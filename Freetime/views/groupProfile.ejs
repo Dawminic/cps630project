@@ -3,65 +3,107 @@
 <html>
 <head>
     <title>GroupProfile</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.css">
+    
+    <!-- JQuery CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-
-
-
-
+    
+    <!-- Custom CSS -->
+    <link href="https://dl.dropbox.com/s/klflnjnudyv1ldw/simple-sidebar.css" rel="stylesheet">
+    
     <style>
         body        { padding-top:80px; word-wrap:break-word; }
     </style>
 </head>
 <body>
-<div class="container">
+<div id="wrapper">
+        <div class="overlay"></div>
+    
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <h3><%= group.name %></h3>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Group Members<span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="dropdown-header">Members currently in this group: </li>
+                    <% for(var i=0; i<group.members.length; i++) {%>
+                      <li><p><%= group.members[i] %></p></li>
+                    <% } %>
+                  </ul>
+                </li>
+                <li>
+                    <a data-toggle="modal" data-target="#myModal">Create New Meeting</a>
+                </li>
+                <li>
+                    <a href="/logout">Logout</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /#sidebar-wrapper -->
 
-    <div class="page-header text-center">
-        <h1> Group Home Page</h1>
-        <h2>Group Name: <%= group.name %>
-
-        </h2>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
-    </div>
-
-    <div class="row">
-
-
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Create New Meeting</button>
-<!-- Create Group Btn & Modal -->
-
-<div id="myModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Create New Meeting</h4>
-      </div>
-       <form method="post">
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Meeting Name</label>
-            <input type="text" class="form-control" name="meetingName">
-            <label>Starting Date</label>
-            <input type="text" class="form-control" name="dateMin">
-            <label>Starting Time</label>
-            <input type="text" class="form-control" name="timeMin">
-            <label>Ending Date</label>
-            <input type="text" class="form-control" name="dateMax">
-            <label>Ending Time</label>
-            <input type="text" class="form-control" name="timeMax">
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+                <span class="hamb-middle"></span>
+                <span class="hamb-bottom"></span>
+            </button>
+            <div class="container">
+                <div class="page-header text-center">
+                    <h1>Group Home Page</h1>
+                    <h2><%= group.name %></h2>
+                </div>
+            </div>
         </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-warning btn-lg">Create</button>
-      </div>
-      </form>
+        <!-- /#page-content-wrapper -->
+    
+    <!-- Create Group Btn & Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Create New Meeting</h4>
+                </div>
+                <form method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Meeting Name</label>
+                            <input type="text" class="form-control" name="meetingName">
+                            <br><br>
+                            <p id="basicExample">
+                                <label> Choose a Date </label><br>
+                                <input type="text" class="date start" id="start" name="dateMin"/> to
+                                <input type="text" class="date end" id="end" name="dateMax"/>
+                                <br><br>
+                                <label> Choose a Time </label><br>
+                                <input type="text" class="time start" name="timeMin"/> to
+                                <input type="text" class="time end" name="timeMax"/>
+                            </p>
+                        </div>
+                        <!-- /#modal-body -->
+                    </div>
+                    <!-- /#form-group -->
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning btn-lg" id="thisButton">Create</button>
+                    </div>
+                </form>
+                
+            </div>
+            <!-- /#modal-content-->
+        </div>
+        <!-- /#modal-dialog  -->
     </div>
-  </div>
-</div>
-
+    <!-- /.modal fade-->
+    </div>
+    <!-- /#wrapper 
     
     <!--
         Import Script Files:
@@ -70,7 +112,59 @@
     -->
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.js"></script>
+        
+    <script>
+        // initialize input widgets first
+        $('#basicExample .time').timepicker({
+            'showDuration': true,
+            'timeFormat': 'g:ia'
+        });
+
+        $('#basicExample .date').datepicker({
+            'format': 'm/d/yyyy',
+            'autoclose': true
+        });
+        
+        $(document).ready(function () {
+            var trigger = $('.hamburger'),
+                overlay = $('.overlay'),
+                isClosed = false;
+
+            trigger.click(function () {
+                hamburger_cross();      
+            });
+
+            function hamburger_cross() {
+
+              if (isClosed == true) {          
+                overlay.hide();
+                trigger.removeClass('is-open');
+                trigger.addClass('is-closed');
+                isClosed = false;
+              } else {   
+                overlay.show();
+                trigger.removeClass('is-closed');
+                trigger.addClass('is-open');
+                isClosed = true;
+              }
+            }
+
+            $('[data-toggle="offcanvas"]').click(function () {
+                $('#wrapper').toggleClass('toggled');
+            });
+        });
+        
+//        $("#members-show").click(function(e) {
+//            e.preventDefault();
+//            var date = $("#start").val();
+//            var end = $("#end").val();
+//            console.log(date.split("/"));
+//            console.log(end.split("/"));
+//        });
+    </script>    
 
 </body>
 </html>

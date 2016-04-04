@@ -32,12 +32,16 @@ module.exports = function(app, passport){
 	app.post('/profile',function(req,res){ 
 		//Get form data
 		var user = req.user;
-		var groupName = req.body.groupName;	
-		var userEmail = user.id; 
+		var groupName = req.body.groupName;
+        var groupEmails = req.body.groupEmails.split(",");
+		var userEmail = user.google.email; 
 		//Create a new group
 		var newGroup = new Group(); 
 		newGroup.name = groupName;
-		newGroup.members.push(userEmail); 
+		newGroup.members.push(userEmail);
+        for(i=0; i<groupEmails.length; i++){
+		  newGroup.members.push(groupEmails[i]);
+        }
 		
 		//save the Group
 		newGroup.save(function(err){
@@ -72,14 +76,16 @@ module.exports = function(app, passport){
 
 
 			//Parse Date
-			var start = req.body.dateMin; 
-			var startmonth = start.slice(0,2);
-			var startday = start.slice(3,5);
-			var startyear = start.slice(6,10);
-			var end = req.body.dateMax;  
-			var endmonth = end.slice(0,2); 
-			var endday = end.slice(3,5);
-			var endyear = end.slice(6,10);
+			var start = req.body.dateMin.split("/");
+            var end = req.body.dateMax.split("/"); 
+            //Start dates
+            var startmonth = parseInt(start[0]);
+            var startday = parseInt(start[1]);
+            var startyear = parseInt(start[2]);
+            //End dates
+            var endmonth = parseInt(end[0]); 
+            var endday = parseInt(end[1]);
+            var endyear = parseInt(end[2]);
 			var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+req.body.timeMin+".0z"; 
 			var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+req.body.timeMax+".0z"; 		        	
 			newMeeting.timeMax = fbTimeMax; 
