@@ -1,6 +1,9 @@
+//THIS IS A TEST COMMENT
+
+
 /*
-	ROUTE.JS 
-		Responsible for the routing of our app. 
+	ROUTE.JS
+		Responsible for the routing of our app.
 		(The sequence of how we get from page to page)
 */
 
@@ -12,39 +15,39 @@ var configAuth = require('./../config/auth');
 //-- UNSURE HOW TO USE GOOGLE CALENDER MODULE AT THE MOMENT
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
-var gcal = require('google-calendar'); 
+var gcal = require('google-calendar');
 
 
 module.exports = function(app, passport){
-//HOME PAGE 
-	
+//HOME PAGE
+
 	app.get('/', function(req,res){
-		res.render("index.ejs"); 
+		res.render("index.ejs");
 	});
 
 //PROFILE PAGE
-	
-	app.get('/profile',isLoggedIn,function(req,res){ 
-		res.render('profile.ejs',{user: req.user}); 
+
+	app.get('/profile',isLoggedIn,function(req,res){
+		res.render('profile.ejs',{user: req.user});
 	});
-	
+
 	//When the user clicks button to create form
-	app.post('/profile',function(req,res){ 
+	app.post('/profile',function(req,res){
 		//Get form data
 		var user = req.user;
-		var groupName = req.body.groupName;	
-		var userEmail = user.id; 
+		var groupName = req.body.groupName;
+		var userEmail = user.id;
 		//Create a new group
-		var newGroup = new Group(); 
+		var newGroup = new Group();
 		newGroup.name = groupName;
-		newGroup.members.push(userEmail); 
-		
+		newGroup.members.push(userEmail);
+
 		//save the Group
 		newGroup.save(function(err){
         if(err){
             console.log(err);
         } else {
-        	//once group is saved add the group to the users list of groups. 
+        	//once group is saved add the group to the users list of groups.
             user.google.groups.push(groupName);
             user.save();
             //go to the groupProfile page. (use group's id in url)
@@ -53,45 +56,45 @@ module.exports = function(app, passport){
     	});
 	});
 
-	// GROUP PROFILE PAGE 
-		app.get('/groupProfile/:groupID',isLoggedIn,function(req,res){ 
+	// GROUP PROFILE PAGE
+		app.get('/groupProfile/:groupID',isLoggedIn,function(req,res){
 		// get the group ID from the url parameter
-		var groupID = req.params.groupID; 
+		var groupID = req.params.groupID;
 		// using the groupID find the corresponding group in our database
 			// so that we can use that information on the page ect.
 		Group.findById(groupID, function(err,group){
-			// load our groupProfile template using the group found in query. 
+			// load our groupProfile template using the group found in query.
 			res.render('groupProfile.ejs',{group: group});
 		});
 	});
 		// get and use information when user creates a new meeting request
-		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){ 
+		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
 		var groupID = req.params.groupID;
-		Group.findById(groupID, function(err,group){ 
+		Group.findById(groupID, function(err,group){
 			var  newMeeting = new Meeting();
 
 
 			//Parse Date
-			var start = req.body.dateMin; 
+			var start = req.body.dateMin;
 			var startmonth = start.slice(0,2);
 			var startday = start.slice(3,5);
 			var startyear = start.slice(6,10);
-			var end = req.body.dateMax;  
-			var endmonth = end.slice(0,2); 
+			var end = req.body.dateMax;
+			var endmonth = end.slice(0,2);
 			var endday = end.slice(3,5);
 			var endyear = end.slice(6,10);
-			var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+req.body.timeMin+".0z"; 
-			var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+req.body.timeMax+".0z"; 		        	
-			newMeeting.timeMax = fbTimeMax; 
-			newMeeting.timeMin = fbTimeMin; 
+			var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+req.body.timeMin+".0z";
+			var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+req.body.timeMax+".0z";
+			newMeeting.timeMax = fbTimeMax;
+			newMeeting.timeMin = fbTimeMin;
 			newMeeting.name = req.body.meetingName;
 			newMeeting.startDay = req.body.dateMin;
-			newMeeting.endDay = req.body.dateMax; 
-			newMeeting.startTime = req.body.timeMin; 
+			newMeeting.endDay = req.body.dateMax;
+			newMeeting.startTime = req.body.timeMin;
 			newMeeting.endTime = req.body.timeMax;
 			newMeeting.group = groupID;
 			newMeeting.meetingMembers = group.members;
-			
+
 			newMeeting.save(function(err){
 		        if(err){
 		            console.log(err);
@@ -113,22 +116,22 @@ module.exports = function(app, passport){
 		});
 
 	//MEETING PAGE
-	app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){ 
+	app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){
 		//console.log(req);
 		var groupID = req.params.groupID;
 		var meetingID = req.params.meetingID;
 		Meeting.findById(meetingID, function(err,meeting){
-			// load our groupProfile template using the group found in query. 
+			// load our groupProfile template using the group found in query.
 			res.render('meetingPage.ejs',{meeting: meeting});
 		});
 
 	});
 
 //LOGOUT
-	// when the user clicks the logout button: 
+	// when the user clicks the logout button:
 		// logout session and send them back to hoome page.
 	app.get('/logout',function(req, res){
-		req.logout(); 
+		req.logout();
 		res.redirect('/');
 
 	});
@@ -148,22 +151,13 @@ module.exports = function(app, passport){
             passport.authenticate('google', {
                     successRedirect : '/profile',
                     failureRedirect : '/'
-            }));			
+            }));
 }
 
 
 //Check to make sure the user is logged in before moving on to next step.
-function isLoggedIn(req,res,next){ 
+function isLoggedIn(req,res,next){
 	if(req.isAuthenticated())
-		return next(); 
+		return next();
 	res.redirect('/login');
 }
-
-
-
-
-
-
-
-
-
