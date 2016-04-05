@@ -1,3 +1,4 @@
+//Test comment
 /*
 	ROUTE.JS 
 		Responsible for the routing of our app. 
