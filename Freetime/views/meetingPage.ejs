@@ -1,6 +1,6 @@
+<!DOCTYPE html>
+<html lang="en">
 <!-- views/groupProfile.ejs -->
-<!doctype html>
-<html>
 <head>
     <title>Meeting Page</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
@@ -19,11 +19,20 @@
     <div class="page-header text-center">
         <h1><span></span> Meeting Page</h1>
         <h2>Meeting Name: <%= meeting.name %>
+        <p id="timeMin" style="display: none"><%=meeting.timeMin%></p>
+            <p id="Useremail" style=""><%=user.google.email%></p>
+            <p id="timeMax" style="display: none"><%=meeting.timeMax%></p>
+            <p id="meetingID" style="display:none"><%=meeting.id%></p>
         </h2>
         <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        <a href="/profile" class="btn btn-default btn-sm">Profile</a>
+        <a href='/groupProfile/<%=meeting.group%>' class="btn btn-default btn-sm">Group</a>
     </div>
 
-  <div id="authorize-div" style="display: none">
+    <h1><u>Meeting Details</u></h1>
+    <h4>Meeting will be held between:</h4>
+    <h4>Duration:<%=meeting.duration%> hr</h4>
+  <div id="authorize-div">
       <span>Authorize access to Google Calendar API</span>
       <!--Button for the user to click to initiate auth sequence -->
       <button id="authorize-button" onclick="handleAuthClick(event)">
@@ -34,13 +43,13 @@
 
 
     <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
-    
+
     <!--
         Import Script Files:
-        - Jquery js 
-        - Bootstrap js 
+        - Jquery js
+        - Bootstrap js
     -->
-    
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script type="text/javascript">
@@ -106,22 +115,28 @@
        * appropriate message is printed.
        */
       function listUpcomingEvents() {
-        var request = gapi.client.calendar.freebusy.query({
-          'timeMin': '2016-02-29T00:00:00.0z',
-          'timeMax': '2016-02-29T23:59:00.0z',
-          'timeZone': 'GMT-04:00',
-          'groupExpansionMax': 1,
-          'calendarExpansionMax': 1,
-          'items': [
-      {
-        "id": 'markstanley92a@gmail.com'
-      }
-      ]
-        });
+	    var timeMin = document.getElementById("timeMin").innerHTML;
+	    var timeMax = document.getElementById("timeMax").innerHTML;
+	    var email = document.getElementById("Useremail").innerHTML;
+      console.log(email);
+	    var meetingid = document.getElementById("meetingID").innerHTML;
+		var request = gapi.client.calendar.freebusy.query({
+		  'timeMin': timeMin,
+		  'timeMax': timeMax,
+		  'timeZone': 'GMT-04:00',
+		  'groupExpansionMax': 1,
+		  'calendarExpansionMax': 1,
+		  'items': [
+			  {
+				"id": email
+			  }
+			]
+		});
 
         request.execute(function(resp) {
-        $.post("/getauth",resp.calendars['markstanley92a@gmail.com']);
-          var ft = JSON.stringify(resp.calendars['markstanley92a@gmail.com']);
+          console.log(resp);
+        $.post("/getauth/"+meetingid,resp.calendars[email]);
+          var ft = JSON.stringify(resp.calendars[email]);
           appendPre('FreeBusy Result');
           appendPre(ft);
 

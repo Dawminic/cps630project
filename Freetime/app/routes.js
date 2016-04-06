@@ -1,7 +1,3 @@
-//THIS IS A TEST COMMENT
-//Another Comment
-
-
 /*
 	ROUTE.JS
 		Responsible for the routing of our app.
@@ -37,23 +33,49 @@ module.exports = function(app, passport){
 		//Get form data
 		var user = req.user;
 		var groupName = req.body.groupName;
-		var userEmail = user.id;
+        var groupEmails = req.body.groupEmails.split(",");
+		userEmail = user.google.email;
 		//Create a new group
 		var newGroup = new Group();
 		newGroup.name = groupName;
 		newGroup.members.push(userEmail);
 
+        for(i=0; i<groupEmails.length; i++){
+			newGroup.members.push(groupEmails[i]);
+
+			//Send group notification to users in group
+			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
+				if (err)
+					return done(err);
+				else
+					groupMember.google.notifications.groupNotif += 1;
+					groupMember.save();
+			});
+        }
+
 		//save the Group
 		newGroup.save(function(err){
-        if(err){
-            console.log(err);
-        } else {
-        	//once group is saved add the group to the users list of groups.
-            user.google.groups.push(groupName);
-            user.save();
-            //go to the groupProfile page. (use group's id in url)
-            res.redirect('/groupProfile/'+newGroup.id);
-        }
+			if(err){
+				console.log(err);
+			} else {
+				//once group is saved add the group to the users list of groups.
+				user.google.groups.push({groupname: groupName,groupID: newGroup.id});
+				user.save();
+
+				for(i=0; i<groupEmails.length; i++) {
+					User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
+						if (err)
+							return done(err);
+						else
+						{
+							groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
+							groupMember.save();
+						}
+					});
+				}
+				//go to the groupProfile page. (use group's id in url)
+				res.redirect('/groupProfile/'+newGroup.id);
+			}
     	});
 	});
 
@@ -70,60 +92,141 @@ module.exports = function(app, passport){
 	});
 		// get and use information when user creates a new meeting request
 		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
-		var groupID = req.params.groupID;
-		Group.findById(groupID, function(err,group){
-			var  newMeeting = new Meeting();
+			var groupID = req.params.groupID;
+			Group.findById(groupID, function(err,group){
+				var  newMeeting = new Meeting();
 
 
-			//Parse Date
-			var start = req.body.dateMin;
-			var startmonth = start.slice(0,2);
-			var startday = start.slice(3,5);
-			var startyear = start.slice(6,10);
-			var end = req.body.dateMax;
-			var endmonth = end.slice(0,2);
-			var endday = end.slice(3,5);
-			var endyear = end.slice(6,10);
-			var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+req.body.timeMin+".0z";
-			var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+req.body.timeMax+".0z";
-			newMeeting.timeMax = fbTimeMax;
-			newMeeting.timeMin = fbTimeMin;
-			newMeeting.name = req.body.meetingName;
-			newMeeting.startDay = req.body.dateMin;
-			newMeeting.endDay = req.body.dateMax;
-			newMeeting.startTime = req.body.timeMin;
-			newMeeting.endTime = req.body.timeMax;
-			newMeeting.group = groupID;
-			newMeeting.meetingMembers = group.members;
+				//Parse Date
+				var start = req.body.dateMin.split("/");
+				var end = req.body.dateMax.split("/");
+				//Start dates
+				var startmonth = parseInt(start[0]);
+				var startday = parseInt(start[1]);
+				var startyear = parseInt(start[2]);
+				//End dates
+				var endmonth = parseInt(end[0]);
+				var endday = parseInt(end[1]);
+				var endyear = parseInt(end[2]);
 
-			newMeeting.save(function(err){
-		        if(err){
-		            console.log(err);
-		        } else {
-		        	group.meetings.push(newMeeting.id);
-		        	group.save();
-		            res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
-		        }
+				var beginTime = req.body.timeMin;
+				var endTime =  req.body.timeMax;
+				var beginSplit = beginTime.split(":");
+				var endSplit = endTime.split(":");
+				var beginHour = parseInt(beginSplit[0]);
+				var beginMinute;
+					//If minutes is '0', make it '00', else leave it as is
+					if(parseInt(beginSplit[1].substring(0,2)) == 0) {
+						beginMinute = "00";
+					}
+					else
+						beginMinute = parseInt(beginSplit[1].substring(0,2));
+				var beginSecond = "00";
+				var beginFinal;
+
+				var endHour = parseInt(endSplit[0]);
+				var endMinute;
+					//If minutes is '0', make it '00', else leave it as is
+					if(parseInt(endSplit[1].substring(0,2)) == 0) {
+						endMinute = "00";
+					}
+					else
+						endMinute = parseInt(endSplit[1].substring(0,2));
+				var endSecond = "00";
+				var endFinal;
+
+				var beginTimeOfDay = beginSplit[1].length - 2;
+				var endTimeOfDay = endSplit[1].length - 2;
 
 
+				//Freebusy query should be in the form: '2016-02-29T10:30:00.0z
 
+				if (parseInt(startmonth) < 10){
+					startmonth = "0" + startmonth;
+				}
 
+				if (parseInt(startday) < 10){
+					startday = "0" + startday;
+				}
+
+				if (parseInt(endmonth) < 10){
+					endmonth = "0" + endmonth;
+				}
+
+				if (parseInt(endday) < 10){
+					endday = "0" + endday;
+				}
+
+				if (beginTimeOfDay = 'p' && beginHour != 12){
+					beginHour = beginHour + 12;
+					beginFinal = beginHour + ":" + beginMinute + ":" + beginSecond;
+				}
+
+				else{
+					beginFinal = "0" + beginHour + ":" + beginMinute + ":" + beginSecond;
+				}
+
+				if (beginTimeOfDay= "a" && beginHour == 12) {
+					beginHour = 0;
+					beginFinal = "0"+ beginHour + ":" + beginMinute + ":" + beginSecond;
+				}
+
+				if (endTimeOfDay = 'p' && endHour != 12){
+					endHour = endHour + 12;
+					endFinal = endHour + ":" + endMinute + ":" + endSecond;
+				}
+
+				else{
+					endFinal = "0" + endHour + ":" + endMinute + ":" + endSecond;
+				}
+
+				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
+				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
+				newMeeting.timeMax = fbTimeMax;
+				newMeeting.timeMin = fbTimeMin;
+				console.log(fbTimeMax);
+				console.log(fbTimeMin);
+				newMeeting.name = req.body.meetingName;
+				newMeeting.startDay = req.body.dateMin;
+				newMeeting.endDay = req.body.dateMax;
+				newMeeting.startTime = req.body.timeMin;
+				newMeeting.endTime = req.body.timeMax;
+				newMeeting.group = groupID;
+				newMeeting.meetingMembers = group.members;
+
+				newMeeting.save(function(err){
+					if(err){
+						console.log(err);
+					} else {
+						group.meetings.push({meetingName:newMeeting.name, meetingID:newMeeting.id});
+						group.save();
+						res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
+					}
+				});
 			});
 		});
-	});
 
-		app.post('/getauth', function (req, res) {
-			//console.log(req.body.busy);
+		app.post('/getauth/:meetingID', function (req, res) {
+			var meetingID = req.params.meetingID;
+			var userEmail = req.user.google.email;
+			var userBusy = req.body.busy;
+
+			Meeting.findById(meetingID, function(err,meeting){
+				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
+				meeting.save();
+				console.log("Meeting Saved!");
+				console.log(userBusy);
+			});
 		});
 
 	//MEETING PAGE
 	app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){
-		//console.log(req);
 		var groupID = req.params.groupID;
 		var meetingID = req.params.meetingID;
+		var user = req.user;
 		Meeting.findById(meetingID, function(err,meeting){
-			// load our groupProfile template using the group found in query.
-			res.render('meetingPage.ejs',{meeting: meeting});
+			// load our meetingPage template using the meeting found in query.
+			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});
 
 	});
