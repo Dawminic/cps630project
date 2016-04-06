@@ -206,6 +206,8 @@ module.exports = function(app, passport){
 			});
 		});
 
+
+		// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
 		app.post('/getauth/:meetingID', function (req, res) {
 			var meetingID = req.params.meetingID;
 			var userEmail = req.user.google.email;
