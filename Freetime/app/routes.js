@@ -45,7 +45,7 @@ module.exports = function(app, passport){
 			newGroup.members.push(groupEmails[i]);
 
 			//Send group notification to users in group
-			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
+			User.Groups.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
 				else
@@ -92,13 +92,13 @@ module.exports = function(app, passport){
 				res.render('groupProfile.ejs',{group: group, user: user});
 			});
 		});
-		
+
 		// get and use information when user creates a new meeting request
 		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
 			var groupID = req.params.groupID;
 			Group.findById(groupID, function(err,group){
 				var  newMeeting = new Meeting();
-				
+
 				//Parse Date
 				var start = req.body.dateMin.split("/");
 				var end = req.body.dateMax.split("/");
@@ -123,7 +123,7 @@ module.exports = function(app, passport){
 					}
 					else
 						beginMinute = parseInt(beginSplit[1].substring(0,2));
-				var beginSecond = "00";
+				var zeroSeconds = "00";
 				var beginFinal;
 
 				var endHour = parseInt(endSplit[0]);
@@ -134,12 +134,10 @@ module.exports = function(app, passport){
 					}
 					else
 						endMinute = parseInt(endSplit[1].substring(0,2));
-				var endSecond = "00";
 				var endFinal;
 
-				var beginTimeOfDay = beginSplit[1].length - 2;
-				var endTimeOfDay = endSplit[1].length - 2;
-
+				var beginTimeOfDay = beginSplit[1].charAt(beginSplit[1].length - 2);
+				var endTimeOfDay = endSplit[1].charAt(endSplit[1].length - 2);
 
 				//Freebusy query should be in the form: '2016-02-29T10:30:00.0z
 
@@ -159,42 +157,62 @@ module.exports = function(app, passport){
 					endday = "0" + endday;
 				}
 
-				if (beginTimeOfDay == 'p' && beginHour != 12){
-					beginHour = beginHour + 12;
-					startTime = beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
+
+				//Parse date so query can work
+				if (endTimeOfDay == 'a' && endHour == 12){
+					var finishTime = "00" + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
+
 				}
 
-				else{
-					startTime = "0" + beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
+				else if(endTimeOfDay == 'a' && endHour > 9 && endHour < 12){
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
+				}
+				else if(endTimeOfDay == 'p' && endHour == 12){
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
 
-				if (beginTimeOfDay== "a" && beginHour == 12) {
-					beginHour = 0;
-					startTime = "0" + beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
-				}
-				
-				/////-----
-				if (endTimeOfDay == 'p' && endHour != 12){
+				else if(endTimeOfDay == 'p' && endHour > 12){
 					endHour = endHour + 12;
-					endTime = endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
 
-				else{
-					endTime = "0" + endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+				else  {
+					var finishTime = "0" + endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
 
-				if (endTimeOfDay== "a" && endHour == 12) {
-					endHour = 0;
-					endTime = "0" + endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+				//Now do the startTime
+				if (beginTimeOfDay == 'a' && beginHour == 12){
+					var startTime = "00" + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
 				}
 
-				
+				else if(beginTimeOfDay == 'a' && beginHour > 9 && beginHour < 12){
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
+
+				else if(beginTimeOfDay == 'p' && beginHour == 12){
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
+
+				else if(beginTimeOfDay == 'p' && beginHour > 12){
+					beginHour = beginHour + 12;
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+
+				}
+
+				else {
+					var startTime = "0" + beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
+
 
 				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
@@ -204,7 +222,7 @@ module.exports = function(app, passport){
 				newMeeting.startDay = req.body.dateMin;
 				newMeeting.endDay = req.body.dateMax;
 				newMeeting.startTime = startTime;
-				newMeeting.endTime = endTime;
+				newMeeting.endTime = finishTime;
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
 				newMeeting.duration = req.body.meetingDuration;
@@ -225,7 +243,8 @@ module.exports = function(app, passport){
 		app.post('/getauth/:meetingID', function (req, res) {
 			var meetingID = req.params.meetingID;
 			var userBusy = req.body.busy;
-            var userEmail = req.user.google.email;
+			var userEmail = req.user.google.email;
+
 			Meeting.findById(meetingID, function(err,meeting){
 				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
 				meeting.save();
