@@ -13,6 +13,7 @@ var configAuth = require('./../config/auth');
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
 var gcal = require('google-calendar');
+require('datejs');
 
 
 module.exports = function(app, passport){
@@ -199,8 +200,6 @@ module.exports = function(app, passport){
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
 				newMeeting.timeMax = fbTimeMax;
 				newMeeting.timeMin = fbTimeMin;
-				console.log(fbTimeMax);
-				console.log(fbTimeMin);
 				newMeeting.name = req.body.meetingName;
 				newMeeting.startDay = req.body.dateMin;
 				newMeeting.endDay = req.body.dateMax;
@@ -208,7 +207,7 @@ module.exports = function(app, passport){
 				newMeeting.endTime = endTime;
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
-
+				newMeeting.duration = req.body.meetingDuration;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
@@ -225,7 +224,6 @@ module.exports = function(app, passport){
 		// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
 		app.post('/getauth/:meetingID', function (req, res) {
 			var meetingID = req.params.meetingID;
-			var userEmail = req.user.google.email;
 			var userBusy = req.body.busy;
 
 			Meeting.findById(meetingID, function(err,meeting){
@@ -243,10 +241,57 @@ module.exports = function(app, passport){
 		var user = req.user;
 		Meeting.findById(meetingID, function(err,meeting){
 			// load our meetingPage template using the meeting found in query.
+
+			var startDate = meeting.startDay + " "+meeting.startTime;
+			var endDate = meeting.endDay + " " + meeting.endTime;
+
+			console.log(Date.parseExact(endDate,"ßhh:mm tt"));
+			console.log(Date.parse(startDate));
 			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});
 
 	});
+
+
+//getFreetime page - displays possible meeting times
+app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
+    //Find the days between start and end intervals
+    var meetingID = req.params.meetingID;
+    Meeting.findById(meetingID, function(err, meeting){
+        // n = the difference in days (including the end day)
+        var oneDay = 24*60*60*1000;
+        var firstDate = new Date(meeting.startDay);
+        var secondDate = new Date(meeting.endDay);
+        var diffDays = Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)) + 1;
+
+       /*  Create array representing every hour of each day within start and end intervals.
+            true = no group member is busy during that hour
+            false = at least one group member is busy during that hour
+       */
+        var n = diffDays * 24;
+        var totalHours = [];
+        for(var i = 0; i < n; i++){
+            totalHours[i] = true;
+        }
+
+        // set all the hours prior to the starting hour to false
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+	res.render('getFreetime.ejs');
+});
+
+
 
 //LOGOUT
 	// when the user clicks the logout button:
@@ -280,5 +325,5 @@ module.exports = function(app, passport){
 function isLoggedIn(req,res,next){
 	if(req.isAuthenticated())
 		return next();
-	res.redirect('/login');
+	res.redirect('/');
 }

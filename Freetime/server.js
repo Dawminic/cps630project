@@ -3,13 +3,15 @@
 */
 // import all the modules needed in app
 // used from our dependencies list in package.json
-var express = require('express'); 
+
+
+var express = require('express');
 var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var passport = require('passport'); 
+var passport = require('passport');
 var flash = require('connect-flash');
 
 // connect to to our database using the mlab.com credentials
@@ -18,23 +20,22 @@ mongoose.connect(configDB.url);
 //passport
 require('./config/passport.js')(passport);
 //initialize app
-var app = express(); 
-//set port to 8000 ---TAKE OUT LATER WHEN 
-var port = process.env.PORT || 8000; 
+var app = express();
+//set port to 8000 ---TAKE OUT LATER WHEN
+var port = process.env.PORT || 8000;
 
-app.use(morgan('dev')); 
-app.use(cookieParser()); 
+app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(session({secret: 'freetime', 
-				saveUninitialized: true, 
+app.use(session({secret: 'freetime',
+				saveUninitialized: true,
 				resave: true}));
 
-app.use(passport.initialize()); 
-app.use(passport.session()); 
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 app.set('view engine','ejs');
 require('./app/routes.js')(app,passport);
 
-
-app.listen(port); 
+app.listen(port);
 console.log('Server running on port: ' + port);

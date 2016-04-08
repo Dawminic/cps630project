@@ -34,29 +34,23 @@
 	<div>
     <h1><u>Meeting Details</u></h1>
     <h4>Meeting will be held between:</h4>
-    <h4>Duration:<%=meeting.duration%> hr</h4>
+    <h4>Duration: <%=meeting.duration%> hrs</h4>
 
     <!-- check to see if all members generated FreeBusy Query-->
     <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
       <p>All members accepted</p>
-      <a href="/profile" class="btn btn-default btn-sm">Possible Meeting Times</a>
+      <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
     <%} else {%>
       <p> Sorry still waiting on members to submit times</p>
+          <div id="authorize-div">
+              <span>Authorize access to Google Calendar API</span>
+              <!--Button for the user to click to initiate auth sequence -->
+              <button id="authorize-button" onclick="handleAuthClick(event)">
+                Authorize
+              </button>
+            </div>
+            <pre id="output"></pre>
     <%}%>
-
-
-
-
-
-  <div id="authorize-div">
-      <span>Authorize access to Google Calendar API</span>
-      <!--Button for the user to click to initiate auth sequence -->
-      <button id="authorize-button" onclick="handleAuthClick(event)">
-        Authorize
-      </button>
-    </div>
-    <pre id="output"></pre>
-
 
     <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
 
@@ -64,11 +58,13 @@
         Import Script Files:
         - Jquery js
         - Bootstrap js
+        - Date js
     -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-<script type="text/javascript">
+    <script type="text/javascript">
+
       // Your Client ID can be retrieved from your project in the Google
       // Developer Console, https://console.developers.google.com
       var CLIENT_ID = '145217622872-45mhibnelavga610sog01k2lkc87f9ab.apps.googleusercontent.com';
