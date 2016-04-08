@@ -28,7 +28,10 @@
         <a href="/profile" class="btn btn-default btn-sm">Profile</a>
         <a href='/groupProfile/<%=meeting.group%>' class="btn btn-default btn-sm">Group</a>
     </div>
-
+	</div>
+		<p>New Groups: <%= user.google.notifications.groupNotif %></p>
+		<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+	<div>
     <h1><u>Meeting Details</u></h1>
     <h4>Meeting will be held between:</h4>
     <h4>Duration: <%=meeting.duration%> hrs</h4>

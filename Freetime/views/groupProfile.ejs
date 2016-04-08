@@ -60,6 +60,10 @@
                     <h2><%= group.name %></h2>
                     <a href="/profile" class="btn btn-default btn-sm">Profile</a>
                 </div>
+				 </div>
+					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
+					<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+				<div>
 
                 <ul>
     <% for(var i = 0; i < group.meetings.length; i++) { %>
