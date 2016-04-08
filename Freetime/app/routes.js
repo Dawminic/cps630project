@@ -35,7 +35,7 @@ module.exports = function(app, passport){
 		var user = req.user;
 		var groupName = req.body.groupName;
         var groupEmails = req.body.groupEmails.split(",");
-		userEmail = user.google.email;
+		var userEmail = req.user.google.email;
 		//Create a new group
 		var newGroup = new Group();
 		newGroup.name = groupName;
@@ -45,7 +45,7 @@ module.exports = function(app, passport){
 			newGroup.members.push(groupEmails[i]);
 
 			//Send group notification to users in group
-			User.Groups.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
+			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
 				else
@@ -156,6 +156,7 @@ module.exports = function(app, passport){
 				if (parseInt(endday) < 10){
 					endday = "0" + endday;
 				}
+				console.log(endHour);
 				
 				//Parse date so query can work
 				if (endTimeOfDay == 'a' && endHour == 12){
@@ -173,7 +174,7 @@ module.exports = function(app, passport){
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
 				
-				else if(endTimeOfDay == 'p' && endHour > 12){
+				else if(endTimeOfDay == 'p' && endHour < 12){
 					endHour = endHour + 12;
 					var finishTime = endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
@@ -200,7 +201,7 @@ module.exports = function(app, passport){
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
 				
-				else if(beginTimeOfDay == 'p' && beginHour > 12){
+				else if(beginTimeOfDay == 'p' && beginHour < 12){
 					beginHour = beginHour + 12;
 					var startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
