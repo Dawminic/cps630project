@@ -58,6 +58,7 @@
                 <div class="page-header text-center">
                     <h1>Group Home Page</h1>
                     <h2><%= group.name %></h2>
+                    <a href="/profile" class="btn btn-default btn-sm">Profile</a>
                 </div>
 				 </div>
 					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
@@ -91,6 +92,9 @@
                             <label>Meeting Name</label>
                             <input type="text" class="form-control" name="meetingName">
                             <br><br>
+                            <label>Duration (in hours)</label>
+                            <input type="number" class="form-control" min="1" name="meetingDuration">
+                            <br>
                             <p id="basicExample">
                                 <label> Choose a Date </label><br>
                                 <input type="text" class="date start" id="start" name="dateMin"/> to

@@ -5,7 +5,7 @@ var userSchema = mongoose.Schema({
 		token:String,
 		email:String,
 		name:String,
-		groups:[{groupname: String, groupID: String}],
+		groups:[{groupname: String, groupID: String, viewed: Boolean}],
 		notifications: {
 			groupNotif: Number,
 			meetingNotif: Number

@@ -7,8 +7,9 @@ var MeetingSchema = mongoose.Schema({
 		endTime:String,
 		timeMin:String,
 		timeMax:String,
+		duration: Number,
 		meetingMembers:[String],
-		membersAccepted: [{email: String, busy: Array}], 
+		membersAccepted: [{email: String, busy: Array}],
 		group: String
 });
 module.exports = mongoose.model('Meeting', MeetingSchema);

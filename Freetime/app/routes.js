@@ -13,6 +13,7 @@ var configAuth = require('./../config/auth');
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
 var gcal = require('google-calendar');
+require('datejs');
 
 
 module.exports = function(app, passport){
@@ -34,7 +35,7 @@ module.exports = function(app, passport){
 		var user = req.user;
 		var groupName = req.body.groupName;
         var groupEmails = req.body.groupEmails.split(",");
-		userEmail = user.google.email;
+		var userEmail = req.user.google.email;
 		//Create a new group
 		var newGroup = new Group();
 		newGroup.name = groupName;
@@ -122,7 +123,7 @@ module.exports = function(app, passport){
 					}
 					else
 						beginMinute = parseInt(beginSplit[1].substring(0,2));
-				var beginSecond = "00";
+				var zeroSeconds = "00";
 				var beginFinal;
 
 				var endHour = parseInt(endSplit[0]);
@@ -133,12 +134,10 @@ module.exports = function(app, passport){
 					}
 					else
 						endMinute = parseInt(endSplit[1].substring(0,2));
-				var endSecond = "00";
 				var endFinal;
 
-				var beginTimeOfDay = beginSplit[1].length - 2;
-				var endTimeOfDay = endSplit[1].length - 2;
-
+				var beginTimeOfDay = beginSplit[1].charAt(beginSplit[1].length - 2);
+				var endTimeOfDay = endSplit[1].charAt(endSplit[1].length - 2);
 
 				//Freebusy query should be in the form: '2016-02-29T10:30:00.0z
 
@@ -157,58 +156,76 @@ module.exports = function(app, passport){
 				if (parseInt(endday) < 10){
 					endday = "0" + endday;
 				}
-
-				if (beginTimeOfDay = 'p' && beginHour != 12){
-					beginHour = beginHour + 12;
-					startTime = beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
-				}
-
-				else{
-					startTime = "0" + beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
-				}
-
-				if (beginTimeOfDay= "a" && beginHour == 12) {
-					beginHour = 0;
-					startTime = "0" + beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + beginSecond;
+				console.log(endHour);
+				
+				//Parse date so query can work
+				if (endTimeOfDay == 'a' && endHour == 12){
+					var finishTime = "00" + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
 				
-				/////-----
-				if (endTimeOfDay = 'p' && endHour != 12){
+				else if(endTimeOfDay == 'a' && endHour > 9 && endHour < 12){
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
+				}
+				
+				else if(endTimeOfDay == 'p' && endHour == 12){
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
+				}
+				
+				else if(endTimeOfDay == 'p' && endHour < 12){
 					endHour = endHour + 12;
-					endTime = endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+					var finishTime = endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
-
-				else{
-					endTime = "0" + endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+				
+				else  {
+					var finishTime = "0" + endHour + ":" + endMinute;
+					endFinal = finishTime + ":" + zeroSeconds;
 				}
-
-				if (endTimeOfDay= "a" && endHour == 12) {
-					endHour = 0;
-					endTime = "0" + endHour + ":" + endMinute;
-					endFinal = endTime + ":" + endSecond;
+				
+				//Now do the startTime
+				if (beginTimeOfDay == 'a' && beginHour == 12){
+					var startTime = "00" + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
 				}
+				
+				else if(beginTimeOfDay == 'a' && beginHour > 9 && beginHour < 12){
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
+				
+				else if(beginTimeOfDay == 'p' && beginHour == 12){
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
+				
+				else if(beginTimeOfDay == 'p' && beginHour < 12){
+					beginHour = beginHour + 12;
+					var startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
 
+				}
+				
+				else {
+					var startTime = "0" + beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + zeroSeconds;
+				}
 				
 
 				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
 				newMeeting.timeMax = fbTimeMax;
 				newMeeting.timeMin = fbTimeMin;
-				console.log(fbTimeMax);
-				console.log(fbTimeMin);
 				newMeeting.name = req.body.meetingName;
 				newMeeting.startDay = req.body.dateMin;
 				newMeeting.endDay = req.body.dateMax;
 				newMeeting.startTime = startTime;
-				newMeeting.endTime = endTime;
+				newMeeting.endTime = finishTime;
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
-
+				newMeeting.duration = req.body.meetingDuration;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
@@ -225,8 +242,8 @@ module.exports = function(app, passport){
 		// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
 		app.post('/getauth/:meetingID', function (req, res) {
 			var meetingID = req.params.meetingID;
-			var userEmail = req.user.google.email;
 			var userBusy = req.body.busy;
+			var userEmail = req.user.google.email;
 
 			Meeting.findById(meetingID, function(err,meeting){
 				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
@@ -243,10 +260,55 @@ module.exports = function(app, passport){
 		var user = req.user;
 		Meeting.findById(meetingID, function(err,meeting){
 			// load our meetingPage template using the meeting found in query.
+
+			var startDate = meeting.startDay + " "+meeting.startTime;
+			var endDate = meeting.endDay + " " + meeting.endTime;
+
 			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});
 
 	});
+
+
+//getFreetime page - displays possible meeting times
+app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
+    //Find the days between start and end intervals
+    var meetingID = req.params.meetingID;
+    Meeting.findById(meetingID, function(err, meeting){
+        // n = the difference in days (including the end day)
+        var oneDay = 24*60*60*1000;
+        var firstDate = new Date(meeting.startDay);
+        var secondDate = new Date(meeting.endDay);
+        var diffDays = Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)) + 1;
+
+       /*  Create array representing every hour of each day within start and end intervals.
+            true = no group member is busy during that hour
+            false = at least one group member is busy during that hour
+       */
+        var n = diffDays * 24;
+        var totalHours = [];
+        for(var i = 0; i < n; i++){
+            totalHours[i] = true;
+        }
+
+        // set all the hours prior to the starting hour to false
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+	res.render('getFreetime.ejs');
+});
+
+
 
 //LOGOUT
 	// when the user clicks the logout button:
@@ -280,5 +342,5 @@ module.exports = function(app, passport){
 function isLoggedIn(req,res,next){
 	if(req.isAuthenticated())
 		return next();
-	res.redirect('/login');
+	res.redirect('/');
 }
