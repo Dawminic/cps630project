@@ -159,7 +159,7 @@ module.exports = function(app, passport){
 					endday = "0" + endday;
 				}
 
-				if (beginTimeOfDay = 'p' && beginHour != 12){
+				if (beginTimeOfDay == 'p' && beginHour != 12){
 					beginHour = beginHour + 12;
 					startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + beginSecond;
@@ -170,14 +170,14 @@ module.exports = function(app, passport){
 					beginFinal = startTime + ":" + beginSecond;
 				}
 
-				if (beginTimeOfDay= "a" && beginHour == 12) {
+				if (beginTimeOfDay== "a" && beginHour == 12) {
 					beginHour = 0;
 					startTime = "0" + beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + beginSecond;
 				}
 				
 				/////-----
-				if (endTimeOfDay = 'p' && endHour != 12){
+				if (endTimeOfDay == 'p' && endHour != 12){
 					endHour = endHour + 12;
 					endTime = endHour + ":" + endMinute;
 					endFinal = endTime + ":" + endSecond;
@@ -188,7 +188,7 @@ module.exports = function(app, passport){
 					endFinal = endTime + ":" + endSecond;
 				}
 
-				if (endTimeOfDay= "a" && endHour == 12) {
+				if (endTimeOfDay== "a" && endHour == 12) {
 					endHour = 0;
 					endTime = "0" + endHour + ":" + endMinute;
 					endFinal = endTime + ":" + endSecond;
@@ -225,7 +225,7 @@ module.exports = function(app, passport){
 		app.post('/getauth/:meetingID', function (req, res) {
 			var meetingID = req.params.meetingID;
 			var userBusy = req.body.busy;
-
+            var userEmail = req.user.google.email;
 			Meeting.findById(meetingID, function(err,meeting){
 				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
 				meeting.save();
@@ -245,8 +245,6 @@ module.exports = function(app, passport){
 			var startDate = meeting.startDay + " "+meeting.startTime;
 			var endDate = meeting.endDay + " " + meeting.endTime;
 
-			console.log(Date.parseExact(endDate,"ßhh:mm tt"));
-			console.log(Date.parse(startDate));
 			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});
 
@@ -275,9 +273,23 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
         }
 
         // set all the hours prior to the starting hour to false
+        var startTime = meeting.startTime;
+        var startHour = startTime.substring(0,2);
+        console.log(startHour);
+        for(var i = 0; i < startHour; i++){
+            totalHours[i]= false;
+        }
 
+        // set all the hours after the ending hour to false
+        var endTime = meeting.endTime;
+        var endHour = endTime.substring(0,2);
+        var endHour = endHour + ((diffDays - 1) * 24);
+        console.log(endHour);
+        for(var i = n; i > endHour; i--){
+            totalHours[i]= false;
+        }
 
-
+        //go through each user's busy time and set value to false when necessary
 
 
 
