@@ -59,6 +59,10 @@
                     <h1>Group Home Page</h1>
                     <h2><%= group.name %></h2>
                 </div>
+				 </div>
+					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
+					<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+				<div>
 
                 <ul>
     <% for(var i = 0; i < group.meetings.length; i++) { %>

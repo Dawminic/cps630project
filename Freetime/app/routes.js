@@ -83,20 +83,21 @@ module.exports = function(app, passport){
 		app.get('/groupProfile/:groupID',isLoggedIn,function(req,res){
 		// get the group ID from the url parameter
 		var groupID = req.params.groupID;
+		var user = req.user;
 		// using the groupID find the corresponding group in our database
 			// so that we can use that information on the page ect.
 		Group.findById(groupID, function(err,group){
-			// load our groupProfile template using the group found in query.
-			res.render('groupProfile.ejs',{group: group});
+				// load our groupProfile template using the group found in query.
+				res.render('groupProfile.ejs',{group: group, user: user});
+			});
 		});
-	});
+		
 		// get and use information when user creates a new meeting request
 		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
 			var groupID = req.params.groupID;
 			Group.findById(groupID, function(err,group){
 				var  newMeeting = new Meeting();
-
-
+				
 				//Parse Date
 				var start = req.body.dateMin.split("/");
 				var end = req.body.dateMax.split("/");
@@ -159,26 +160,40 @@ module.exports = function(app, passport){
 
 				if (beginTimeOfDay = 'p' && beginHour != 12){
 					beginHour = beginHour + 12;
-					beginFinal = beginHour + ":" + beginMinute + ":" + beginSecond;
+					startTime = beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + beginSecond;
 				}
 
 				else{
-					beginFinal = "0" + beginHour + ":" + beginMinute + ":" + beginSecond;
+					startTime = "0" + beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + beginSecond;
 				}
 
 				if (beginTimeOfDay= "a" && beginHour == 12) {
 					beginHour = 0;
-					beginFinal = "0"+ beginHour + ":" + beginMinute + ":" + beginSecond;
+					startTime = "0" + beginHour + ":" + beginMinute;
+					beginFinal = startTime + ":" + beginSecond;
 				}
-
+				
+				/////-----
 				if (endTimeOfDay = 'p' && endHour != 12){
 					endHour = endHour + 12;
-					endFinal = endHour + ":" + endMinute + ":" + endSecond;
+					endTime = endHour + ":" + endMinute;
+					endFinal = endTime + ":" + endSecond;
 				}
 
 				else{
-					endFinal = "0" + endHour + ":" + endMinute + ":" + endSecond;
+					endTime = "0" + endHour + ":" + endMinute;
+					endFinal = endTime + ":" + endSecond;
 				}
+
+				if (endTimeOfDay= "a" && endHour == 12) {
+					endHour = 0;
+					endTime = "0" + endHour + ":" + endMinute;
+					endFinal = endTime + ":" + endSecond;
+				}
+
+				
 
 				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
@@ -189,8 +204,8 @@ module.exports = function(app, passport){
 				newMeeting.name = req.body.meetingName;
 				newMeeting.startDay = req.body.dateMin;
 				newMeeting.endDay = req.body.dateMax;
-				newMeeting.startTime = req.body.timeMin;
-				newMeeting.endTime = req.body.timeMax;
+				newMeeting.startTime = startTime;
+				newMeeting.endTime = endTime;
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
 
