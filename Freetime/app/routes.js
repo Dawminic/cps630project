@@ -156,8 +156,6 @@ module.exports = function(app, passport){
 				if (parseInt(endday) < 10){
 					endday = "0" + endday;
 				}
-
-
 				//Parse date so query can work
 				if (endTimeOfDay == 'a' && endHour == 12){
 					var finishTime = "00" + ":" + endMinute;
@@ -174,7 +172,8 @@ module.exports = function(app, passport){
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
 
-				else if(endTimeOfDay == 'p' && endHour > 12){
+
+				else if(endTimeOfDay == 'p' && endHour < 12){
 					endHour = endHour + 12;
 					var finishTime = endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
@@ -201,7 +200,7 @@ module.exports = function(app, passport){
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
 
-				else if(beginTimeOfDay == 'p' && beginHour > 12){
+				else if(beginTimeOfDay == 'p' && beginHour < 12){
 					beginHour = beginHour + 12;
 					var startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
@@ -381,10 +380,10 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
                 var sDayHour_String;
                 if(sDayHour == 0){
                     sDayHour_String = "12:00AM";
-                } else if (sDayHour > 0 && sDayHour < 13){ 
+                } else if (sDayHour > 0 && sDayHour < 13){
                     sDayHour_String = sDayHour +":00AM";
-                } else { 
-                    sDayHour = sDayHour - 12; 
+                } else {
+                    sDayHour = sDayHour - 12;
                     sDayHour_String = sDayHour + ":00PM";
                 }
                 sDay_String = sDay.substring(0,15);
