@@ -35,7 +35,7 @@ module.exports = function(app, passport){
 		var user = req.user;
 		var groupName = req.body.groupName;
         var groupEmails = req.body.groupEmails.split(",");
-		userEmail = user.google.email;
+		var userEmail = req.user.google.email;
 		//Create a new group
 		var newGroup = new Group();
 		newGroup.name = groupName;
@@ -45,7 +45,7 @@ module.exports = function(app, passport){
 			newGroup.members.push(groupEmails[i]);
 
 			//Send group notification to users in group
-			User.Groups.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
+			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
 				else
@@ -92,13 +92,13 @@ module.exports = function(app, passport){
 				res.render('groupProfile.ejs',{group: group, user: user});
 			});
 		});
-		
+
 		// get and use information when user creates a new meeting request
 		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
 			var groupID = req.params.groupID;
 			Group.findById(groupID, function(err,group){
 				var  newMeeting = new Meeting();
-				
+
 				//Parse Date
 				var start = req.body.dateMin.split("/");
 				var end = req.body.dateMax.split("/");
@@ -156,62 +156,63 @@ module.exports = function(app, passport){
 				if (parseInt(endday) < 10){
 					endday = "0" + endday;
 				}
-				
+
+
 				//Parse date so query can work
 				if (endTimeOfDay == 'a' && endHour == 12){
 					var finishTime = "00" + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
+
 				}
-				
+
 				else if(endTimeOfDay == 'a' && endHour > 9 && endHour < 12){
 					var finishTime = endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
-				
 				else if(endTimeOfDay == 'p' && endHour == 12){
 					var finishTime = endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
-				
+
 				else if(endTimeOfDay == 'p' && endHour > 12){
 					endHour = endHour + 12;
 					var finishTime = endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
-				
+
 				else  {
 					var finishTime = "0" + endHour + ":" + endMinute;
 					endFinal = finishTime + ":" + zeroSeconds;
 				}
-				
+
 				//Now do the startTime
 				if (beginTimeOfDay == 'a' && beginHour == 12){
 					var startTime = "00" + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
-				
+
 				else if(beginTimeOfDay == 'a' && beginHour > 9 && beginHour < 12){
 					var startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
-				
+
 				else if(beginTimeOfDay == 'p' && beginHour == 12){
 					var startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
-				
+
 				else if(beginTimeOfDay == 'p' && beginHour > 12){
 					beginHour = beginHour + 12;
 					var startTime = beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
 
 				}
-				
+
 				else {
 					var startTime = "0" + beginHour + ":" + beginMinute;
 					beginFinal = startTime + ":" + zeroSeconds;
 				}
-				
+
 
 				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
@@ -291,20 +292,138 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
         }
 
         // set all the hours prior to the starting hour to false
+        var startTime = meeting.startTime;
+        var startHour = startTime.substring(0,2);
+        for(var i = 0; i < startHour; i++){
+            totalHours[i]= false;
+        }
 
+        // set all the hours after the ending hour to false
+        var endTime = meeting.endTime;
+        var endHour = endTime.substring(0,2);
+        var endHour = parseInt(endHour) + ((diffDays - 1) * 24);
+        for(var i = n-1; i >= endHour; i--){
+            totalHours[i]= false;
+        }
 
+        //go through each user's busy time and set value to false when necessary
+        numberOfMembers = meeting.membersAccepted.length;
+        for(var i = 0; i < numberOfMembers; i++){
+            numberOfEvents = meeting.membersAccepted[i].busy.length;
+            for(var j = 0; j < numberOfEvents; j++ ) {
+                // get the start and end time of that event
+                // separate it into two parts -> date and time
+                // splits the string at the T
+                // [0] = the date
+                // [1] = the time
+                s = meeting.membersAccepted[i].busy[j].start.split("T");
+                e = meeting.membersAccepted[i].busy[j].end.split("T");
 
+                // START
+                s[0] = new Date(s[0]);
+                diffDays = Math.round(Math.abs((firstDate.getTime() - s[0].getTime())/(oneDay)));
+                // [0] = hour
+                // [1] = min
 
+                var sTime = s[1].substring(0,5).split(":");
+                var sHour = parseInt(sTime[0]);
+                var sMin = parseInt(sTime[1]);
+                var sTakeOut = sHour + (diffDays * 24);
 
+                // END
+                e[0] = new Date(e[0]);
+                diffDays = Math.round(Math.abs((firstDate.getTime() - e[0].getTime())/(oneDay)));
+                // [0] = hour
+                // [1] = min
+                var eTime = e[1].substring(0,5).split(":");
+                var eHour = parseInt(eTime[0]);
+                var eMin = parseInt(eTime[1]);
+                if(eMin > 0){
+                    eHour = eHour + 1;
+                }
+                var eTakeOut = eHour + (diffDays * 24);
+                for(var k = sTakeOut; k <= eTakeOut; k++){
+                    totalHours[k] = false;
+                }
+            }
+        }
+        var startArray= [];
+        var endArray = [];
+        for(var i = 0; i < n; i++) {
+            if(totalHours[i] == true){
+                startArray.push(i);
+                for(var j = i; j < n; j++){
+                    if(totalHours[j] == false || j == (n-1)){
+                        endArray.push(j-1);
+                        i = j;
+                        break;
+                    }
 
+                }
+            }
+        }
+        var startDayArray = [];
+        var endDayArray = [];
 
+        for(var i = 0; i < startArray.length; i++){
+            //duration check
+            var sHour = startArray[i];
+            var eHour = endArray[i];
+            var duration = meeting.duration;
+            if((eHour - sHour) >= duration){
+                //START: Transform into Day String
+                var sDaysAway = Math.floor(sHour/24);
+                sHour = sHour - (sDaysAway * 24);
+                var fDate = new Date(meeting.startDay);
+                var sDay = fDate.addDays(sDaysAway).addHours(sHour);
+                sDay = sDay.toString().substring(0,21);
+                sDayHour = parseInt(sDay.substring(15,18));
+                var sDayHour_String;
+                if(sDayHour == 0){
+                    sDayHour_String = "12:00AM";
+                } else if (sDayHour > 0 && sDayHour < 13){ 
+                    sDayHour_String = sDayHour +":00AM";
+                } else { 
+                    sDayHour = sDayHour - 12; 
+                    sDayHour_String = sDayHour + ":00PM";
+                }
+                sDay_String = sDay.substring(0,15);
+                sFinal = sDay_String + " " + sDayHour_String;
+                startDayArray.push(sFinal);
+
+                var eDaysAway = Math.floor(eHour/24);
+                eHour = eHour - (eDaysAway * 24);
+                var fDate = new Date(meeting.startDay);
+                var eDay = fDate.addDays(eDaysAway).addHours(eHour);
+                eDay = eDay.toString().substring(0,21);
+                eDayHour = parseInt(eDay.substring(15,18)) + 1;
+                var eDayHour_String;
+                if(eDayHour == 0){
+                    eDayHour_String = "12:00AM";
+                } else if (eDayHour > 0 && eDayHour < 13){
+                    eDayHour_String = eDayHour +":00AM";
+                } else {
+                    eDayHour = eDayHour - 12;
+                    eDayHour_String = eDayHour + ":00PM";
+                }
+                eDay_String = eDay.substring(0,15);
+                eFinal = eDay_String + " " + eDayHour_String;
+
+                endDayArray.push(eFinal);
+            }
+        }
+        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray});
+        /*
+        for(var i = 0; i < startDayArray.length; i++){
+                console.log("Possible Meeting Slot: " + i);
+                console.log("START TIME: " + startDayArray[i]);
+                console.log("END TIME:  " + endDayArray[i]);
+        }
+        */
+       // for(var i = 0; i < n; i++) {
+         //   console.log(i + " " + totalHours[i]);
+       // }
     });
-
-
-
-
-
-	res.render('getFreetime.ejs');
 });
 
 

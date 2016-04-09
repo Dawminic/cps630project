@@ -1,9 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Bootstrap Core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css" />
 </head>
 <body>
-  <h1> Possible Meeting Times <h1>
-  
+  <div class="container">
+      <h2>Possible Meeting Times</h2>
+      <p>Below are all the dates and times in which your group has free time in common</p>
+      <table class="table">
+          <thead>
+          <tr>
+              <th></th>
+              <th>Starting</th>
+              <th>Ending</th>
+          </tr>
+          </thead>
+          <tbody>
+          <% for(var i = 0; i < startDays.length; i++) { %>
+          <tr>
+              <td><%= i %></td>
+              <td><%=startDays[i]%></td>
+              <td><%=endDays[i]%></td>
+          </tr>
+          <%}%>
+          </tbody>
+      </table>
+  </div>
 </body>
 </html>
