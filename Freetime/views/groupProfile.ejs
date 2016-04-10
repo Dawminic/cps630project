@@ -90,7 +90,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Meeting Name</label>
-                            <input type="text" class="form-control" name="meetingName">
+                            <input type="text" class="form-control" name="meetingName" id="meetingName">
                             <br><br>
                             <label>Duration (in hours)</label>
                             <input type="number" class="form-control" min="1" name="meetingDuration">
@@ -171,6 +171,13 @@
 
             $('[data-toggle="offcanvas"]').click(function () {
                 $('#wrapper').toggleClass('toggled');
+            });
+			
+			// Meeting Name Validation
+            $("#thisButton").click(function(e) {
+				var meetingName = $("#meetingName").val();
+				var meetName = "";
+				
             });
         });
 
