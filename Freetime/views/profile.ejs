@@ -115,7 +115,8 @@
                         <div class="modal-body">
                         <div class="form-group">
                             <label>Group Name</label>
-                            <input type="text" class="form-control" name="groupName" required><br>
+                            <input type="text" class="form-control" name="groupName" id="groupName" required><br>
+							<label id="errorMessageGroupName" style="color:red;"></label><br>
                             <label>Members</label><br>
                             <input type="text" data-role="tagsinput" placeholder="Enter google email addresses" name="groupEmails" id="groupEmails" required/>
                             <label id="errorMessage" style="color:red;"></label>
@@ -139,6 +140,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
 
+	
     <!-- Menu Toggle Script -->
     <script>
         //REGEX Check
@@ -181,8 +183,21 @@
                 $('#user-group-information').toggle();
             });
 
-            // Email Validation
+            // Group Name/Email Validation
             $("#thisButton").click(function(e) {
+				var groupName = $("#groupName").val();
+				var grName = "";
+				
+				//Group Name validation
+				<% for(var i = 0; i < user.google.groups.length; i++) { %>
+						grName = "<%= user.google.groups[i].groupname%>";
+						if (grName.toUpperCase() === groupName.toUpperCase()) {
+							$('#errorMessageGroupName').html("Sorry, group with this name already exists");
+							e.preventDefault();
+						}
+				<%}%>
+				
+				//Email validation
 		        var values = $("#groupEmails").val().split(",");
                 for(i=0; i<values.length; i++){
                     if( !isValidEmailAddress( values[i] ) ) {
