@@ -28,6 +28,15 @@ module.exports = function(app, passport){
 	app.get('/profile',isLoggedIn,function(req,res){
 		res.render('profile.ejs',{user: req.user});
 	});
+	
+	app.get('/resetNotifs', function(req,res) {
+		var user = req.user;
+		user.google.notifications.groupNotif = 0;
+		user.google.notifications.meetingNotif = 0;
+		user.save();
+		res.render('profile.ejs', {user: req.user});
+	});
+	
 
 	//When the user clicks button to create form
 	app.post('/profile',function(req,res){
@@ -262,6 +271,18 @@ module.exports = function(app, passport){
 
 			var startDate = meeting.startDay + " "+meeting.startTime;
 			var endDate = meeting.endDay + " " + meeting.endTime;
+			var meetingEmails = meeting.meetingMembers;
+			
+			for(i=0; i<meetingEmails.length; i++){
+				//Send group notification to users in meeting
+				User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
+					if (err)
+						return done(err);
+					else
+						meetingMember.google.notifications.meetingNotif += 1;
+						meetingMember.save();
+				});
+			}
 
 			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});

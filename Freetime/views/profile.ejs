@@ -77,6 +77,12 @@
                 </div>
 					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
 					<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+					<button onclick="resetNotifs()">Check Notifications</button>
+					<script>
+						function resetNotifs() {
+							$.get("/resetNotifs");
+						}
+					</script>
 				<div>
 					
 				</div>
