@@ -62,7 +62,7 @@
                 </div>
 				 </div>
 					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
-					<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+					<p>New Meetings: <%= user.google.notifications.meetingNotif %></p>
 				<div>
 
                 <ul>
@@ -90,19 +90,20 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Meeting Name</label>
-                            <input type="text" class="form-control" name="meetingName">
-                            <br><br>
+                            <input type="text" class="form-control" name="meetingName" id="meetingName" required>
+							<label id="errorMessageMeetingName" style="color:red;"></label>
+                            <br>
                             <label>Duration (in hours)</label>
-                            <input type="number" class="form-control" min="1" name="meetingDuration">
+                            <input type="number" class="form-control" min="1" name="meetingDuration" required>
                             <br>
                             <p id="basicExample">
                                 <label> Choose a Date </label><br>
-                                <input type="text" class="date start" id="start" name="dateMin"/> to
-                                <input type="text" class="date end" id="end" name="dateMax"/>
+                                <input type="text" class="date start" id="start" name="dateMin"  required/> to
+                                <input type="text" class="date end" id="end" name="dateMax"  required/>
                                 <br><br>
                                 <label> Choose a Time </label><br>
-                                <input type="text" class="time start" name="timeMin"/> to
-                                <input type="text" class="time end" name="timeMax"/>
+                                <input type="text" class="time start" name="timeMin"  required/> to
+                                <input type="text" class="time end" name="timeMax"  required/>
                             </p>
                         </div>
                         <!-- /#modal-body -->
@@ -171,6 +172,20 @@
 
             $('[data-toggle="offcanvas"]').click(function () {
                 $('#wrapper').toggleClass('toggled');
+            });
+			
+			// Meeting Name Validation
+            $("#thisButton").click(function(e) {
+				var meetingName = $("#meetingName").val();
+				var meetName = "";
+				
+				<% for(var i = 0; i < group.meetings.length; i++) { %>
+					meetName = "<%= group.meetings[i].meetingName%>";	
+					if (meetName.toUpperCase() === meetingName.toUpperCase()) {
+						$('#errorMessageMeetingName').html("Sorry, meeting with this name already exists");
+						e.preventDefault();
+					}
+				<%}%>
             });
         });
 

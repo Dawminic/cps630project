@@ -256,8 +256,6 @@ module.exports = function(app, passport){
 			Meeting.findById(meetingID, function(err,meeting){
 				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
 				meeting.save();
-				console.log("Meeting Saved!");
-				console.log(userBusy);
 			});
 		});
 
