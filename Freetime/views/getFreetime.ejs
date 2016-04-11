@@ -12,7 +12,7 @@
       <table class="table">
           <thead>
           <tr>
-              <th></th>
+              <th>Slot</th>
               <th>Starting</th>
               <th>Ending</th>
           </tr>
@@ -20,7 +20,7 @@
           <tbody>
           <% for(var i = 0; i < startDays.length; i++) { %>
           <tr>
-              <td><%= i %></td>
+              <td><%= i+1 %></td>
               <td><%=startDays[i]%></td>
               <td><%=endDays[i]%></td>
           </tr>
