@@ -29,10 +29,16 @@ module.exports = function(app, passport){
 		res.render('profile.ejs',{user: req.user});
 	});
 	
-	app.get('/resetNotifs', function(req,res) {
+	app.get('/resetgroupNotifs', function(req,res) {
 		var user = req.user;
-		user.google.notifications.groupNotif = 0;
-		user.google.notifications.meetingNotif = 0;
+		user.google.notifications.groupNotifCount = 0;
+		user.save();
+		res.render('profile.ejs', {user: req.user});
+	});
+    
+    app.get('/resetmeetingNotifs', function(req,res) {
+		var user = req.user;
+		user.google.notifications.meetingNotifCount = 0;
 		user.save();
 		res.render('profile.ejs', {user: req.user});
 	});
@@ -59,6 +65,7 @@ module.exports = function(app, passport){
 					return done(err);
 				else
 					groupMember.google.notifications.groupNotif += 1;
+                    groupMember.google.notifications.groupNotifCount += 1;
 					groupMember.save();
 			});
         }
@@ -278,6 +285,7 @@ module.exports = function(app, passport){
 						return done(err);
 					else
 						meetingMember.google.notifications.meetingNotif += 1;
+                        meetingMember.google.notifications.groupNotifCount += 1;
 						meetingMember.save();
 				});
 			}

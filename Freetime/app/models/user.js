@@ -8,7 +8,9 @@ var userSchema = mongoose.Schema({
 		groups:[{groupname: String, groupID: String, viewed: Boolean}],
 		notifications: {
 			groupNotif: Number,
-			meetingNotif: Number
+			meetingNotif: Number,
+            groupNotifCount: Number,
+			meetingNotifCount: Number
 		}
 	}
 });

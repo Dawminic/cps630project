@@ -16,6 +16,10 @@
 
     <style>
         body        { padding-top:80px; word-wrap:break-word; }
+        p#basicExample input {
+            width: 30%;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -98,12 +102,13 @@
                             <br>
                             <p id="basicExample">
                                 <label> Choose a Date </label><br>
-                                <input type="text" class="date start" id="start" name="dateMin"  required/> to
-                                <input type="text" class="date end" id="end" name="dateMax"  required/>
+                                <input type="text" class="date start form-control" id="start" name="dateMin"  required/> to
+                                <input type="text" class="date end form-control" id="end" name="dateMax"  required/>
                                 <br><br>
                                 <label> Choose a Time </label><br>
-                                <input type="text" class="time start" name="timeMin"  required/> to
-                                <input type="text" class="time end" name="timeMax"  required/>
+                                <input type="text" class="time start form-control" name="timeMin"  required/> to
+                                <input type="text" class="time end form-control" name="timeMax"  required/>
+                                 
                             </p>
                         </div>
                         <!-- /#modal-body -->
@@ -135,18 +140,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.js"></script>
 
     <script>
-        // initialize input widgets first
-        $('#basicExample .time').timepicker({
-            'showDuration': true,
-            'timeFormat': 'g:ia'
-        });
-
-        $('#basicExample .date').datepicker({
-            'format': 'm/d/yyyy',
-            'autoclose': true
-        });
-
+        
         $(document).ready(function () {
+            
+            // initialize input widgets first
+            $('#basicExample .time').timepicker({
+                'showDuration': true,
+                'timeFormat': 'g:ia'
+            });
+
+            $('#basicExample .date.start').datepicker({
+                'format': 'm/d/yyyy',
+                'autoclose': true,
+                'startDate': "today",
+				'todayHighlight' : true
+            });
+            
+            $('#basicExample .date.end').datepicker({
+                'format': 'm/d/yyyy',
+                'autoclose': true,
+                'startDate': "tomorrow"
+            });
+            
             var trigger = $('.hamburger'),
                 overlay = $('.overlay'),
                 isClosed = false;
