@@ -64,9 +64,13 @@ module.exports = function(app, passport){
 				if (err)
 					return done(err);
 				else
-					groupMember.google.notifications.groupNotif += 1;
-                    groupMember.google.notifications.groupNotifCount += 1;
-					groupMember.save();
+					//check if groupMember is null
+					if (groupMember){
+						//console.log(groupMember);
+						groupMember.google.notifications.groupNotif += 1;
+						groupMember.google.notifications.groupNotifCount += 1;
+						groupMember.save();
+					}
 			});
         }
 
@@ -85,8 +89,11 @@ module.exports = function(app, passport){
 							return done(err);
 						else
 						{
-							groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
-							groupMember.save();
+							//check if groupMember is null
+							if (groupMember){
+								groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
+								groupMember.save();
+							}
 						}
 					});
 				}
@@ -284,9 +291,12 @@ module.exports = function(app, passport){
 					if (err)
 						return done(err);
 					else
-						meetingMember.google.notifications.meetingNotif += 1;
-                        meetingMember.google.notifications.groupNotifCount += 1;
-						meetingMember.save();
+						//check if meetingMember is null
+						if (meetingMember){
+							meetingMember.google.notifications.meetingNotif += 1;
+							meetingMember.google.notifications.groupNotifCount += 1;
+							meetingMember.save();
+						}
 				});
 			}
 

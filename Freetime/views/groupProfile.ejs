@@ -153,7 +153,7 @@
                 'format': 'm/d/yyyy',
                 'autoclose': true,
                 'startDate': "today",
-				'todayHighlight' : true
+				//'todayHighlight' : true
             });
             
             $('#basicExample .date.end').datepicker({
@@ -161,7 +161,18 @@
                 'autoclose': true,
                 'startDate': "tomorrow"
             });
-            
+			
+			//when user selects 'start date' in 'Create new meeting',
+			//the first available 'end date' for this meeting is selected 'start date' + 1 
+			$('#basicExample .date.start').on('change.dp', function (e) {
+				var date = $('#basicExample .date.start').val();
+				var dt = new Date(date);
+				
+				//increment selected date by 1
+				dt.setDate(dt.getDate() + 1);
+				$('#basicExample .date.end').datepicker('setStartDate', dt);
+			});
+			
             var trigger = $('.hamburger'),
                 overlay = $('.overlay'),
                 isClosed = false;
