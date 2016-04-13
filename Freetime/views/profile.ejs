@@ -330,16 +330,26 @@
 				var userList = "<%=userList%>";
 				var currUserList = userList.split(",");
                 for(i=0; i<values.length; i++){
-                    if( !isValidEmailAddress( values[i] ) ) {
-                        $('#errorMessage').html("Sorry, " + values[i] + " is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
-//                        alert("This is not an email!");
-                        e.preventDefault();
-                    }
 					
-					//If group member does NOT have a Freetime account, notify user which member does not have an account
-					else if ( !currUserList.includes(values[i]) ){
-                        $('#errorMessage').html("Sorry, '" + values[i] + "' does not have a Freetime account. Please enter a valid account.");
+					//If user tries to create a group with no members display an error message
+					if (values[i] == ""){
+						$('#errorMessage').html("Please add members to your group");
 						e.preventDefault();
+					}	
+					else {
+						
+						if( !isValidEmailAddress( values[i] ) ) {
+							
+							$('#errorMessage').html("Sorry, '" + values[i] + "' is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
+//                  	      alert("This is not an email!");
+							e.preventDefault();
+						}
+						
+						//If group member does NOT have a Freetime account, notify user which member does not have an account
+						else if ( !currUserList.includes(values[i]) ){
+							$('#errorMessage').html("Sorry, '" + values[i] + "' does not have a Freetime account. Please enter a valid account.");
+							e.preventDefault();
+						}
 					}
                 }
 				
