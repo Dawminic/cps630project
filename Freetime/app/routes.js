@@ -26,7 +26,10 @@ module.exports = function(app, passport){
 //PROFILE PAGE
 
 	app.get('/profile',isLoggedIn,function(req,res){
-		res.render('profile.ejs',{user: req.user});
+        //get all the emails of every user in the db
+        User.find().distinct('google.email', function (err, userEmails) {
+            res.render('profile.ejs',{user: req.user, userList:userEmails});
+        });
 	});
 
 	//When the user clicks button to create form
@@ -225,6 +228,7 @@ module.exports = function(app, passport){
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
 				newMeeting.duration = req.body.meetingDuration;
+                newMeeting.moderator = req.user.google.email;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
@@ -409,7 +413,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
                 endDayArray.push(eFinal);
             }
         }
-        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray});
+        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
         /*
         for(var i = 0; i < startDayArray.length; i++){
                 console.log("Possible Meeting Slot: " + i);
