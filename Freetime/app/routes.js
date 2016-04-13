@@ -63,10 +63,7 @@ module.exports = function(app, passport){
 			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
-				else
-					//check if groupMember is null
-					if (groupMember){
-						//console.log(groupMember);
+				else{
 						groupMember.google.notifications.groupNotif += 1;
 						groupMember.google.notifications.groupNotifCount += 1;
 						groupMember.save();
@@ -89,11 +86,8 @@ module.exports = function(app, passport){
 							return done(err);
 						else
 						{
-							//check if groupMember is null
-							if (groupMember){
-								groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
-								groupMember.save();
-							}
+							groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
+							groupMember.save();
 						}
 					});
 				}
@@ -290,9 +284,7 @@ module.exports = function(app, passport){
 				User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
 					if (err)
 						return done(err);
-					else
-						//check if meetingMember is null
-						if (meetingMember){
+					else{
 							meetingMember.google.notifications.meetingNotif += 1;
 							meetingMember.google.notifications.groupNotifCount += 1;
 							meetingMember.save();
