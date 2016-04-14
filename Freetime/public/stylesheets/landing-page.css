@@ -1,0 +1,230 @@
+/*!
+ * Start Bootstrap - Landing Page Bootstrap Theme (http://startbootstrap.com)
+ * Code licensed under the Apache License v2.0.
+ * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+ */
+@import url(https://fonts.googleapis.com/css?family=Josefin+Sans);
+@import url(https://fonts.googleapis.com/css?family=Playfair+Display);
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 700;
+}
+
+.navbar-default{
+    background-color: white;
+    border-color: white;
+    margin: 0;
+}
+
+.navbar .navbar-nav {
+  display: inline-block;
+  float: none;
+  vertical-align: top;
+}
+
+.navbar .navbar-collapse {
+  text-align: center;
+}
+h1#logoColor {
+    color: #2B78C2;
+    font-size: 100px;
+    margin-top: -10%;
+    margin-bottom: 2.5%;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.topnav {
+    font-size: 14px;
+}
+
+/* Top Nav Title (Overrides Bootstrap)*/
+a#logoColor{
+    color: #2B78C2;
+    font-size: 20px;
+}
+
+p#logoColor {
+    color: lightskyblue;
+    font-size: 24px;
+    margin-bottom: 5%;
+    font-style: italic;
+    letter-spacing: 5px;
+/*    font-family: 'Playfair Display', serif;*/
+}
+
+h3#logoColor {
+    color: gray;
+    font-family: 'Playfair Display', serif;
+}
+.lead {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.intro-header {
+    padding-top: 0; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
+    padding-bottom: 0;
+    text-align: center;
+    color: #f8f8f8;
+    background-size: cover;
+}
+
+.intro-message {
+    position: relative;
+    padding-top: 20%;
+    padding-bottom: 20%;
+}
+
+.intro-message > h1 {
+    margin: 0;
+    font-size: 5em;
+}
+
+.intro-divider {
+    width: 80%;
+    border-top: 1px solid #f8f8f8;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+
+.intro-message > h3 {
+    color: black;
+}
+
+@media(max-width:767px) {
+    .intro-message {
+        padding-bottom: 15%;
+    }
+
+    .intro-message > h1 {
+        font-size: 3em;
+    }
+
+    ul.intro-social-buttons > li {
+        display: block;
+        margin-bottom: 20px;
+        padding: 0;
+    }
+
+    ul.intro-social-buttons > li:last-child {
+        margin-bottom: 0;
+    }
+
+    .intro-divider {
+        width: 100%;
+    }
+}
+
+.network-name {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 2px;
+}
+
+/* Section A */
+.content-section-a {
+    font-size: 24px;
+    padding-top: 10%;
+    padding-bottom: 10%;
+    background-color: #e4e4e4;
+}
+
+#freetime {
+    color: lightskyblue;
+}
+
+@media(max-width:1199px) {
+    img#mobile-center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+/* Section B */
+.content-section-b {
+    font-size: 24px;
+    padding: 50px 0;
+    border-top: 1px solid #e7e7e7;
+    border-bottom: 1px solid #e7e7e7;
+    background-color: #428BCF;
+}
+
+.section-heading {
+    font-size: 32px;
+}
+
+.section-heading-spacer {
+    float: left;
+    width: 200px;
+    border-top: 3px solid white;
+}
+
+/* About Section */
+.bottomColumns {
+    margin-top: 5%;
+    width: 50%;
+    float: left;
+}
+
+@media(max-width:1299px) {
+    .bottomColumns {
+        margin-top: 0;
+        width: 100%;
+    }
+}
+
+@media(min-width: 1800px){
+    .bottomColumns {
+        margin-right: 5%;
+        width: 45%;
+    }
+}
+.aboutus-container {
+    margin-top: 2.5%;
+    width: 100%;
+}
+
+div.aboutus-container p{
+    color: white;
+}
+
+div.aboutus-container small{
+    color: lightcyan;
+    font-style: italic;
+    letter-spacing: 2px;
+}
+h1#header, h2#header{
+    margin-left: 2.5%;
+}
+
+p#text {
+    margin-left: 2.5%;
+}
+
+#aboutus-divider {
+    width: 50%;
+}
+
+.spacing-bottom{
+    margin-top: 12.5%;
+}
+footer {
+    padding: 50px 0;
+    background-color: #e4e4e4;
+}
+
+p.copyright {
+    margin: 15px 0 0;
+}
