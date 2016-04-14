@@ -1,0 +1,72 @@
+#nav {
+    list-style:none;
+    margin: 0px;
+    padding: 0px; 
+    margin-top: 20px;
+}
+
+#nav li {
+    float: right;
+    margin-right: 5%;
+    font-weight:bold;
+}
+
+#nav li a {
+    color:#333333;
+    text-decoration:none;
+}
+
+#nav li a:hover{
+    color:#006699;
+    text-decoration:none
+}
+
+#notification_li{
+    position:relative
+}
+
+#group_notif_count, #meet_notif_count {
+    padding: 3px 7px 3px 7px;
+    background: #cc0000;
+    color: #ffffff;
+    font-weight: bold;
+    margin-left: 125%;
+    border-radius: 9px;
+    -moz-border-radius: 9px; 
+    -webkit-border-radius: 9px;
+    position: absolute;
+    margin-top: -11px;
+    font-size: 11px;
+}
+
+#font-group {
+    font-size: 30px;
+}
+
+#font-calendar {
+    font-size: 30px;
+}
+
+.alert-group {
+    color: white;
+    background-color: #ADD8E6;
+    border-color: rgba(149, 149, 149, 0.3);
+    border-radius: 3px;
+    padding: 10px;
+}
+
+h2#group-header{
+    color: white;
+}
+
+.alert-meeting {
+    color: white;
+    background-color: #E62020;
+    border-color: rgba(149, 149, 149, 0.3);
+    border-radius: 3px;
+    padding: 10px;
+}
+
+h2#meeting-header{
+    color: white;
+}

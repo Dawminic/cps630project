@@ -1,4 +1,4 @@
-/* 
+/*
 config/passport.js
     Responsible for :
         authenticating the user
@@ -11,7 +11,7 @@ var configAuth = require('./auth');
 
 // load the user and group model
 var User            = require('../app/models/user');
-var Group = require('../app/models/user'); 
+var Group = require('../app/models/user');
 
 //EXPORT
 module.exports = function(passport) {
@@ -60,13 +60,12 @@ module.exports = function(passport) {
                     // set all of the relevant information
                     newUser.google.id    = profile.id;
                     newUser.google.token = token;
-                    
+
                     newUser.google.name  = profile.displayName;
                     newUser.google.email = profile.emails[0].value; // pull the first email
 					newUser.google.notifications.groupNotif = 0;
                     newUser.google.notifications.groupNotifCount = 0;
 					newUser.google.notifications.meetingNotif = 0;
-                    newUser.google.notifications.meetingNotifCount = 0;
                     // save the user
                     newUser.save(function(err) {
                         if (err)
