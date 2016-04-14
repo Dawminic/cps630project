@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var MeetingSchema = mongoose.Schema({
 		name: String,
-        moderator: String,
 		startDay: String,
 		endDay:String,
 		startTime:String,

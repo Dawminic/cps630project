@@ -26,10 +26,7 @@ module.exports = function(app, passport){
 //PROFILE PAGE
 
 	app.get('/profile',isLoggedIn,function(req,res){
-        //get all the emails of every user in the db
-        User.find().distinct('google.email', function (err, userEmails) {
-            res.render('profile.ejs',{user: req.user, userList:userEmails});
-        });
+		res.render('profile.ejs',{user: req.user});
 	});
 	
 	app.get('/resetgroupNotifs', function(req,res) {
@@ -66,11 +63,10 @@ module.exports = function(app, passport){
 			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
-				else{
-						groupMember.google.notifications.groupNotif += 1;
-						groupMember.google.notifications.groupNotifCount += 1;
-						groupMember.save();
-					}
+				else
+					groupMember.google.notifications.groupNotif += 1;
+                    groupMember.google.notifications.groupNotifCount += 1;
+					groupMember.save();
 			});
         }
 
@@ -245,13 +241,25 @@ module.exports = function(app, passport){
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
 				newMeeting.duration = req.body.meetingDuration;
-                newMeeting.moderator = req.user.google.email;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
 					} else {
-						group.meetings.push({meetingName:newMeeting.name, meetingID:newMeeting.id});
+						group.meetings.push({meetingName: newMeeting.name, startDay: newMeeting.startDay, endDay: newMeeting.endDay, startTime: newMeeting.startTime, endTime: newMeeting.endTime, meetingID:newMeeting.id});
 						group.save();
+                        //Memebers Emails that are in the meeting
+                        var meetingEmails = meeting.meetingMembers;
+                        for(i=0; i<meetingEmails.length; i++){
+                            //Send group notification to users in meeting
+                            User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
+                                if (err)
+                                    return done(err);
+                                else
+                                    meetingMember.google.notifications.meetingNotif += 1;
+                                    meetingMember.google.notifications.meetingNotifCount += 1;
+                                    meetingMember.save();
+                            });
+                        }
 						res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
 					}
 				});
@@ -281,20 +289,6 @@ module.exports = function(app, passport){
 
 			var startDate = meeting.startDay + " "+meeting.startTime;
 			var endDate = meeting.endDay + " " + meeting.endTime;
-			var meetingEmails = meeting.meetingMembers;
-			
-			for(i=0; i<meetingEmails.length; i++){
-				//Send group notification to users in meeting
-				User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
-					if (err)
-						return done(err);
-					else{
-							meetingMember.google.notifications.meetingNotif += 1;
-							meetingMember.google.notifications.groupNotifCount += 1;
-							meetingMember.save();
-						}
-				});
-			}
 
 			res.render('meetingPage.ejs',{meeting: meeting, user: user});
 		});
@@ -444,7 +438,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
                 endDayArray.push(eFinal);
             }
         }
-        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
+        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray});
         /*
         for(var i = 0; i < startDayArray.length; i++){
                 console.log("Possible Meeting Slot: " + i);
