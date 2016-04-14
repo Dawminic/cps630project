@@ -37,74 +37,20 @@
     <h4>Duration: <%=meeting.duration%> hrs</h4>
 
     <!-- check to see if all members generated FreeBusy Query-->
-
-        <%  if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
-        <p>All members accepted !</p>
-        <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
-
-        <%
-        } else {
-        var found = 0;
-        var notSubmitted = [];
-
-        for(var i = 0; i < meeting.meetingMembers.length;i++){
-            var memberFound = 0;
-            for(var j = 0; j < meeting.membersAccepted.length; j++){
-                if(meeting.meetingMembers[i] == meeting.membersAccepted[j].email){
-                    memberFound = 1;
-                }
-            }
-            if(memberFound != 1){
-                notSubmitted.push(meeting.meetingMembers[i]);
-            }
-        }
-
-        for(var i = 0; i < meeting.membersAccepted.length;i++) {
-            if(meeting.membersAccepted[i].email == user.google.email){
-                found = 1;
-            }
-        }
-        if(found == 1){
-
-
-
-        %>
-
-
-
-
-        <p> You already submitted your busy times, Waiting on the following users with the emails to submit thier times </p>
-
-
-
-
-
-
-
-        <%
-        for(var i = 0; i < notSubmitted.length;i++) { %>
-           <p> <%=
-                   notSubmitted[i]
-
-               %></p>
-
-
-       <% }
-
-
-
-
-        } else { %>
-        <div id="authorize-div">
-            <span>In order for us to find free time for your meeting you must submit the times you are busy. It's easy, just click the button below.
-            </span>
-            <!--Button for the user to click to initiate auth sequence -->
-        <button id="authorize-button" onclick="handleAuthClick(event)">
-            Submit Busy Times
-        </button>
-        </div>
-        <pre id="output"></pre>
-        <% } } %>
+    <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
+      <p>All members accepted</p>
+      <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
+    <%} else {%>
+      <p> Sorry still waiting on members to submit times</p>
+          <div id="authorize-div">
+              <span>Authorize access to Google Calendar API</span>
+              <!--Button for the user to click to initiate auth sequence -->
+              <button id="authorize-button" onclick="handleAuthClick(event)">
+                Authorize
+              </button>
+            </div>
+            <pre id="output"></pre>
+    <%}%>
 
     <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
 
@@ -123,7 +69,7 @@
       // Developer Console, https://console.developers.google.com
       var CLIENT_ID = '145217622872-45mhibnelavga610sog01k2lkc87f9ab.apps.googleusercontent.com';
 
-      var SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
+      var SCOPES = ["https://www.googleapis.com/auth/calendar.readonly","https://www.googleapis.com/auth/calendar"];
 
       /**
        * Check if current user has authorized this application.
@@ -184,7 +130,6 @@
 	    var timeMin = document.getElementById("timeMin").innerHTML;
 	    var timeMax = document.getElementById("timeMax").innerHTML;
 	    var email = document.getElementById("Useremail").innerHTML;
-      console.log(email);
 	    var meetingid = document.getElementById("meetingID").innerHTML;
 		var request = gapi.client.calendar.freebusy.query({
 		  'timeMin': timeMin,
@@ -202,7 +147,9 @@
         request.execute(function(resp) {
           console.log(resp);
         $.post("/getauth/"+meetingid,resp.calendars[email]);
-          appendPre("Your results have been submitted!");
+          var ft = JSON.stringify(resp.calendars[email]);
+          appendPre('FreeBusy Result');
+          appendPre(ft);
 
 
         });

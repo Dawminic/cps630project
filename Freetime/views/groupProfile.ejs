@@ -16,6 +16,10 @@
 
     <style>
         body        { padding-top:80px; word-wrap:break-word; }
+        p#basicExample input {
+            width: 30%;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +66,7 @@
                 </div>
 				 </div>
 					<p>New Groups: <%= user.google.notifications.groupNotif %></p>
-					<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
+					<p>New Meetings: <%= user.google.notifications.meetingNotif %></p>
 				<div>
 
                 <ul>
@@ -90,19 +94,21 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Meeting Name</label>
-                            <input type="text" class="form-control" name="meetingName">
-                            <br><br>
+                            <input type="text" class="form-control" name="meetingName" id="meetingName" required>
+							<label id="errorMessageMeetingName" style="color:red;"></label>
+                            <br>
                             <label>Duration (in hours)</label>
-                            <input type="number" class="form-control" min="1" name="meetingDuration">
+                            <input type="number" class="form-control" min="1" name="meetingDuration" required>
                             <br>
                             <p id="basicExample">
                                 <label> Choose a Date </label><br>
-                                <input type="text" class="date start" id="start" name="dateMin"/> to
-                                <input type="text" class="date end" id="end" name="dateMax"/>
+                                <input type="text" class="date start form-control" id="start" name="dateMin"  required/> to
+                                <input type="text" class="date end form-control" id="end" name="dateMax"  required/>
                                 <br><br>
                                 <label> Choose a Time </label><br>
-                                <input type="text" class="time start" name="timeMin"/> to
-                                <input type="text" class="time end" name="timeMax"/>
+                                <input type="text" class="time start form-control" name="timeMin"  required/> to
+                                <input type="text" class="time end form-control" name="timeMax"  required/>
+                                 
                             </p>
                         </div>
                         <!-- /#modal-body -->
@@ -134,18 +140,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.js"></script>
 
     <script>
-        // initialize input widgets first
-        $('#basicExample .time').timepicker({
-            'showDuration': true,
-            'timeFormat': 'g:ia'
-        });
-
-        $('#basicExample .date').datepicker({
-            'format': 'm/d/yyyy',
-            'autoclose': true
-        });
-
+        
         $(document).ready(function () {
+            
+            // initialize input widgets first
+            $('#basicExample .time').timepicker({
+                'showDuration': true,
+                'timeFormat': 'g:ia'
+            });
+
+            $('#basicExample .date.start').datepicker({
+                'format': 'm/d/yyyy',
+                'autoclose': true,
+                'startDate': "today",
+				//'todayHighlight' : true
+            });
+            
+            $('#basicExample .date.end').datepicker({
+                'format': 'm/d/yyyy',
+                'autoclose': true,
+                'startDate': "tomorrow"
+            });
+			
+			//when user selects 'start date' in 'Create new meeting',
+			//the first available 'end date' for this meeting is selected 'start date' + 1 
+			$('#basicExample .date.start').on('change.dp', function (e) {
+				var date = $('#basicExample .date.start').val();
+				var dt = new Date(date);
+				
+				//increment selected date by 1
+				dt.setDate(dt.getDate() + 1);
+				$('#basicExample .date.end').datepicker('setStartDate', dt);
+			});
+			
             var trigger = $('.hamburger'),
                 overlay = $('.overlay'),
                 isClosed = false;
@@ -171,6 +198,20 @@
 
             $('[data-toggle="offcanvas"]').click(function () {
                 $('#wrapper').toggleClass('toggled');
+            });
+			
+			// Meeting Name Validation
+            $("#thisButton").click(function(e) {
+				var meetingName = $("#meetingName").val();
+				var meetName = "";
+				
+				<% for(var i = 0; i < group.meetings.length; i++) { %>
+					meetName = "<%= group.meetings[i].meetingName%>";	
+					if (meetName.toUpperCase() === meetingName.toUpperCase()) {
+						$('#errorMessageMeetingName').html("Sorry, meeting with this name already exists");
+						e.preventDefault();
+					}
+				<%}%>
             });
         });
 

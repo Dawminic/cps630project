@@ -31,6 +31,21 @@ module.exports = function(app, passport){
             res.render('profile.ejs',{user: req.user, userList:userEmails});
         });
 	});
+	
+	app.get('/resetgroupNotifs', function(req,res) {
+		var user = req.user;
+		user.google.notifications.groupNotifCount = 0;
+		user.save();
+		res.render('profile.ejs', {user: req.user});
+	});
+    
+    app.get('/resetmeetingNotifs', function(req,res) {
+		var user = req.user;
+		user.google.notifications.meetingNotifCount = 0;
+		user.save();
+		res.render('profile.ejs', {user: req.user});
+	});
+	
 
 	//When the user clicks button to create form
 	app.post('/profile',function(req,res){
@@ -51,9 +66,11 @@ module.exports = function(app, passport){
 			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
-				else
-					groupMember.google.notifications.groupNotif += 1;
-					groupMember.save();
+				else{
+						groupMember.google.notifications.groupNotif += 1;
+						groupMember.google.notifications.groupNotifCount += 1;
+						groupMember.save();
+					}
 			});
         }
 
@@ -99,7 +116,7 @@ module.exports = function(app, passport){
 		// get and use information when user creates a new meeting request
 		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
 			var groupID = req.params.groupID;
-			Group.findById(groupID, function(err,group){
+            Group.findById(groupID, function(err,group){
 				var  newMeeting = new Meeting();
 
 				//Parse Date
@@ -229,12 +246,29 @@ module.exports = function(app, passport){
 				newMeeting.meetingMembers = group.members;
 				newMeeting.duration = req.body.meetingDuration;
                 newMeeting.moderator = req.user.google.email;
+                newMeeting.final = false;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
 					} else {
 						group.meetings.push({meetingName:newMeeting.name, meetingID:newMeeting.id});
-						group.save();
+                        group.save();
+                        var meetingEmails = newMeeting.meetingMembers;
+                        for(i=0; i<meetingEmails.length; i++){
+                            //Send group notification to users in meeting
+                            User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
+                                if (err)
+                                    return done(err);
+                                else{
+                                    meetingMember.google.notifications.meetingNotif += 1;
+                                    meetingMember.google.notifications.meetingNotifCount += 1;
+                                    meetingMember.save();
+                                }
+                            });
+                        }
+
+
+
 						res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
 					}
 				});
@@ -425,6 +459,56 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
          //   console.log(i + " " + totalHours[i]);
        // }
     });
+
+    /*
+        When moderator submits a final meeting time for the group.
+     */
+    app.post('/getFreetime/:meetingID',function(req,res){
+
+        var meetingID = req.params.meetingID;
+        var start = req.body.MeetingTime;
+
+
+
+        Meeting.findById(meetingID, function(err, meeting){
+          meeting.final = true;
+        start = new Date(start);
+            var temp = start;
+            temp = temp.toString(("yyyy-MM-ddTHH:mm:ss"));
+            temp = temp + "-04:00";
+
+        var end = start.addHours(meeting.duration).toString("yyyy-MM-ddTHH:mm:ss");
+            end = end + "-04:00" ;
+            meeting.timeMin = temp;
+            meeting.timeMax = end;
+            meeting.save();
+            res.redirect('/getFreetime/'+meetingID+"/submit");
+
+        });
+        
+
+    });
+
+    app.get('/getFreetime/:meetingID/submit',isLoggedIn,function(req,res) {
+        var startDayArray = [];
+        var endDayArray = [];
+        var meetingID = req.params.meetingID;
+        Meeting.findById(meetingID, function(err, meeting){
+        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
+        });
+    })
+    
+    app.post('/submitted/:meetingID',function(req,res) {
+        var startDayArray = [];
+        var endDayArray = [];
+        var meetingID = req.params.meetingID;
+        Meeting.findById(meetingID, function(err, meeting){
+            meeting.submittedUsers.push(req.user.google.email);
+            meeting.save();
+            res.redirect('/getFreetime/'+meetingID);
+        });
+    })
+    
 });
 
 
