@@ -17,6 +17,7 @@
 
     <!-- Custom CSS -->
     <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
+    <link href="/public/stylesheets/notifications.css" rel="stylesheet">    
     <style>
         /* PUT IN A CSS FILE */
         div h1{
@@ -77,12 +78,12 @@
         <ul id="nav">
             <li id="notification_li">
             <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
-            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group"></i></a>
+            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group" aria-hidden="true"></i></a>
             </li>
 
             <li id="notification_li">
                 <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
-                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar"></i></a>
+                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar" aria-hidden="true"></i></a>
             </li>
         </ul>
 
@@ -97,6 +98,9 @@
                 </li>
                 <li>
                     <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Create New Group</a>
+                </li>
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#delFreeTime"><i class="fa fa-remove" aria-hidden="true"></i> Delete Account</a>
                 </li>
                 <li>
                     <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
@@ -146,7 +150,30 @@
             </div>
         </div>
         <!-- /#page-content-wrapper -->
-
+		<!-- Create Delete FreeTime Account Btn & Modal -->
+			<div id="delFreeTime" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Delete FreeTime Account</h4>
+					</div>
+						<form action="/deleteAccount" method="post" id="thisForm">
+							<div class="modal-body">
+							<div class="form-group">
+								<label>Are you sure you would like to delete your FreeTime Account?</label>
+							</div>
+							</div>
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-danger btn-lg" id="yesRemove">Yes</button>
+								<button type="button" data-dismiss="modal" class="btn btn-default btn-lg" id="noRemove">No</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		<!-- /#modal -->
         <!-- Create Group Btn & Modal -->
         <div id="myModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -185,13 +212,12 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
     <!-- Menu Toggle Script -->
     <script>
         //REGEX Check
         function isValidEmailAddress(emailAddress) {
-            var pattern = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@gmail.com/i;
+            var pattern = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@(?:gmail.com|ryerson.ca)/i;
             return pattern.test(emailAddress);
         };
 
@@ -244,13 +270,35 @@
 				
 				//Email validation
 		        var values = $("#groupEmails").val().split(",");
+				var userList = "<%=userList%>";
+				var currUserList = userList.split(",");
                 for(i=0; i<values.length; i++){
-                    if( !isValidEmailAddress( values[i] ) ) {
-                        $('#errorMessage').html("Sorry, " + values[i] + " is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
-//                        alert("This is not an email!");
-                        e.preventDefault();
-                    }
+                    // For error checking
+                    // e.preventDefault();
+                    
+					//If user tries to create a group with no members display an error message
+					if (values[i] == ""){
+						$('#errorMessage').html("Please add members to your group");
+						e.preventDefault();
+					}	
+					else {
+						
+						if( !isValidEmailAddress( values[i] ) ) {
+							
+							$('#errorMessage').html("Sorry, '" + values[i] + "' is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
+//                  	      alert("This is not an email!");
+							e.preventDefault();
+						}
+						
+						//If group member does NOT have a Freetime account, notify user which member does not have an account
+						else if ( currUserList.indexOf(values[i]) == -1 ){
+							$('#errorMessage').html("Sorry, '" + values[i] + "' does not have a Freetime account. Please enter a valid account.");
+							e.preventDefault();
+						}
+					}
                 }
+				
+				
             });
             
             //Show Group Notification
