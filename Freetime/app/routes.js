@@ -112,6 +112,7 @@ module.exports = function(app, passport){
 				Group.findById(groups[i].groupID, function(err, group) {
 					var members = group.members;
 					var index = members.indexOf(userToRemove);
+					var groupID = group.id;
 					
 					//If there are only 2 people inside the group that the
 					//current user wants to leave
@@ -125,10 +126,11 @@ module.exports = function(app, passport){
 						
 						//Remove the group to be removed from each user's
 						//list of groups
-						for (var i=0; i<members.length; i++) {
+						for (var i=1; i<members.length; i++) {
 							//Find the user, and loop through their groups
 							//till you find the group to be removed, and 
 							//remove it
+							//if (members[i] == userToRemove) i++;;
 							User.findOne({"google.email": members[i]}, function (err, groupMember){	
 								var currMemberGroups = groupMember.google.groups;
 								for (var j=0; j<currMemberGroups.length; j++) {
@@ -140,9 +142,9 @@ module.exports = function(app, passport){
 								}
 								
 							});
-							//Delete the group from the database
-							Group.find({"_id": group.id}).remove().exec();
 						}
+						//Delete the group from the database
+						Group.find({"_id": group.id}).remove().exec();
 					}
 				
 					else {
