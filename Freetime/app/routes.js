@@ -513,7 +513,7 @@ module.exports = function(app, passport){
             var end = new Date(meeting.timeMax);
             end = dateFormat(end, "dddd, mmmm dS, yyyy, h:MM:ss TT");
 			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID, start: start, end: end});
-        });
+		});
 
 	});
 
@@ -580,7 +580,8 @@ module.exports = function(app, passport){
 
 		res.redirect('/profile');
 
-	});
+
+    });
 
 
 //getFreetime page - displays possible meeting times
