@@ -502,8 +502,73 @@ module.exports = function(app, passport){
 			var startDate = meeting.startDay + " "+meeting.startTime;
 			var endDate = meeting.endDay + " " + meeting.endTime;
 
-			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID});
+			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID});		
+        });
+
+	});
+	
+	//Removal of a user from a meeting
+	app.post('/removeMeeting/:groupID/:meetingID', function(req,res) {
+		var user = req.user;
+		var meetingID = req.params.meetingID;
+		var groupID = req.params.groupID;
+		var userToRemove = user.google.email;
+		
+		Meeting.findById(meetingID, function (err, meeting){
+			var meetingMems = meeting.meetingMembers;
+			var acceptedMems = meeting.membersAccepted;
+			var index = meetingMems.indexOf(userToRemove);
+			meetingMems.splice(index, 1);
+			
+			//If there were only 2 people scheduled for the meeting
+			if (meetingMems.length < 2)
+			{
+				//Search for the group that the meeting is in
+				Group.findById(groupID, function (err, group) {
+					var meetingsForGroup = group.meetings;
+					
+					//Remove the meeting from the group's list of meetings
+					for (var i=0; i<meetingsForGroup.length; i++) {
+							if (meetingsForGroup[i].meetingID == meetingID) {
+								group.meetings.splice(i, 1);
+								break;
+							}
+					}	
+					group.save();
+
+				});
+				
+				//Delete the meeting and save the updated group info
+				Meeting.find({"_id": meeting.id}).remove().exec();
+			}
+			
+			//Else just remove the user's info from the meeting
+			else { 
+				//If user is moderator, remove user from meetingMembers, 
+				//set a new moderator
+				if (meeting.moderator == userToRemove) {
+					meeting.moderator = meetingMems[0];
+				}
+				
+				//If a member of the meeting has authorized calendar access,
+				//check to see if it is the current user, and remove the info
+				if (acceptedMems.length > 0) {
+					for  (var k=0; k<acceptedMems.length; k++) {
+						if (acceptedMems[k].email == userToRemove) {
+							acceptedMems.splice(k, 1);
+							break;
+						}
+					}
+				}
+				
+				meeting.meetingMembers = meetingMems;
+				meeting.acceptedMembers = acceptedMems;
+				meeting.save();
+			}
+			
 		});
+		
+		res.redirect('/profile');
 
 	});
 	
