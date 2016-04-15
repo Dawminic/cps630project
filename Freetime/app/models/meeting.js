@@ -10,6 +10,7 @@ var MeetingSchema = mongoose.Schema({
 		timeMin:String,
 		timeMax:String,
 		duration: Number,
+        location: String,
 		meetingMembers:[String],
 		membersAccepted: [{email: String, busy: Array}],
 		group: String, 

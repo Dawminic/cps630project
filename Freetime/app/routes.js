@@ -12,6 +12,7 @@ var configAuth = require('./../config/auth');
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
 var gcal = require('google-calendar');
+var dateFormat = require('dateformat');
 require('datejs');
 
 
@@ -347,6 +348,7 @@ module.exports = function(app, passport){
 				newMeeting.group = groupID;
 				newMeeting.meetingMembers = group.members;
 				newMeeting.duration = req.body.meetingDuration;
+                newMeeting.location = req.body.meetingLocation;
                 newMeeting.moderator = req.user.google.email;
                 newMeeting.final = false;
 				newMeeting.save(function(err){
@@ -505,10 +507,12 @@ module.exports = function(app, passport){
         Meeting.findById(meetingID, function(err,meeting){
             // load our meetingPage template using the meeting found in query.
 
-            var startDate = meeting.startDay + " "+meeting.startTime;
-            var endDate = meeting.endDay + " " + meeting.endTime;
-
-			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID});
+           var start = new Date(meeting.timeMin);
+            start = dateFormat(start, "dddd, mmmm dS, yyyy, h:MM:ss TT");
+            console.log(start);
+            var end = new Date(meeting.timeMax);
+            end = dateFormat(end, "dddd, mmmm dS, yyyy, h:MM:ss TT");
+			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID, start: start, end: end});
 		});
 
 	});

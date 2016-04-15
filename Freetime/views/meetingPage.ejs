@@ -36,7 +36,10 @@
 	<div>
     <h1><u>Meeting Details</u></h1>
     <h4>Meeting will be held between:</h4>
+        <h4>Start Day: <%=start%> </h4>
+        <h4>End Day: <%=end%></h4>
     <h4>Duration: <%=meeting.duration%> hrs</h4>
+        <h4>Location: <%=meeting.location%></h4>
 
     <!-- check to see if all members generated FreeBusy Query-->
     <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
