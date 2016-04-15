@@ -3,13 +3,10 @@
 <!-- views/groupProfile.ejs -->
 <head>
     <title>Meeting Page</title>
-    
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-    
-    <!-- Custom CSS -->
-    <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
+
+
 
 
     <style>
@@ -43,17 +40,27 @@
     <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
       <p>All members accepted</p>
       <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
+    <%}
+    // if the user already submitted their freebusy time
+    else{
+    var found = 0;
+    for(var i = 0; i < meeting.membersAccepted.length; i++){
+        if(user.google.email == meeting.membersAccepted[i].email){
+            found = 1;
+        }
+    }if(found == 1){%>
+        <p>You have already accepted Waiting on the other groups</p>
+        <p> List the members that still have to respond</p>
     <%} else {%>
-      <p> Sorry still waiting on members to submit times</p>
-          <div id="authorize-div">
-              <span>Authorize access to Google Calendar API</span>
-              <!--Button for the user to click to initiate auth sequence -->
-              <button id="authorize-button" onclick="handleAuthClick(event)">
-                Authorize
-              </button>
-            </div>
-            <pre id="output"></pre>
-    <%}%>
+      <p>To help find a meeting please submit your busy time</p>
+        <div id="authorize-div">
+            <!--Button for the user to click to initiate auth sequence -->
+            <button id="authorize-button" onclick="handleAuthClick(event)">
+               Submit Your Schedule
+            </button>
+        </div>
+        <p id="output"></p>
+    <%}}%>
 
     <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
 
@@ -66,9 +73,6 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-        
     <script type="text/javascript">
 
       // Your Client ID can be retrieved from your project in the Google
@@ -150,15 +154,14 @@
 			]
 		});
 
-        request.execute(function(resp) {
-          console.log(resp);
-        $.post("/getauth/"+meetingid,resp.calendars[email]);
-          var ft = JSON.stringify(resp.calendars[email]);
-          appendPre('FreeBusy Result');
-          appendPre(ft);
+          request.execute(function(resp) {
+              console.log(resp);
+              $.post("/getauth/"+meetingid,resp.calendars[email]);
+              var ft = JSON.stringify(resp.calendars[email]);
+              appendPre("Your busy time has been submitted successfully. Waiting on the rest of the group members to do the same.");
 
 
-        });
+          });
       }
 
       /**
@@ -168,11 +171,10 @@
        * @param {string} message Text to be placed in pre element.
        */
       function appendPre(message) {
-        var pre = document.getElementById('output');
-        var textContent = document.createTextNode(message + '\n');
-        pre.appendChild(textContent);
+          var pre = document.getElementById('output');
+          var textContent = document.createTextNode(message + '\n');
+          pre.appendChild(textContent);
       }
-        
     </script>
 
 

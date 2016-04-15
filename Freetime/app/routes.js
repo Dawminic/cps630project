@@ -9,7 +9,6 @@ var User = require('./models/user');
 var Group = require('./models/group');
 var Meeting = require('./models/meeting');
 var configAuth = require('./../config/auth');
-//-- UNSURE HOW TO USE GOOGLE CALENDER MODULE AT THE MOMENT
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
 var gcal = require('google-calendar');
@@ -31,21 +30,21 @@ module.exports = function(app, passport){
             res.render('profile.ejs',{user: req.user, userList:userEmails});
         });
 	});
-
+	
 	app.get('/resetgroupNotifs', function(req,res) {
 		var user = req.user;
 		user.google.notifications.groupNotifCount = 0;
 		user.save();
 		res.render('profile.ejs', {user: req.user});
 	});
-
+    
     app.get('/resetmeetingNotifs', function(req,res) {
 		var user = req.user;
 		user.google.notifications.meetingNotifCount = 0;
 		user.save();
 		res.render('profile.ejs', {user: req.user});
 	});
-
+	
 
 	//When the user clicks button to create form
 	app.post('/profile',function(req,res){
@@ -66,10 +65,11 @@ module.exports = function(app, passport){
 			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
-				else
-					groupMember.google.notifications.groupNotif += 1;
-                    groupMember.google.notifications.groupNotifCount += 1;
-					groupMember.save();
+				else{
+						groupMember.google.notifications.groupNotif += 1;
+						groupMember.google.notifications.groupNotifCount += 1;
+						groupMember.save();
+					}
 			});
         }
 
@@ -250,21 +250,22 @@ module.exports = function(app, passport){
 					if(err){
 						console.log(err);
 					} else {
-						group.meetings.push({meetingName: newMeeting.name, startDay: newMeeting.startDay, endDay: newMeeting.endDay, startTime: newMeeting.startTime, endTime: newMeeting.endTime, meetingID:newMeeting.id});
-						group.save();
-                        //Memebers Emails that are in the meeting
-                        var meetingEmails = meeting.meetingMembers;
+						group.meetings.push({meetingName:newMeeting.name, meetingID:newMeeting.id});
+                        group.save();
+                        var meetingEmails = newMeeting.meetingMembers;
                         for(i=0; i<meetingEmails.length; i++){
                             //Send group notification to users in meeting
                             User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
                                 if (err)
                                     return done(err);
-                                else
+                                else{
                                     meetingMember.google.notifications.meetingNotif += 1;
                                     meetingMember.google.notifications.meetingNotifCount += 1;
                                     meetingMember.save();
+                                }
                             });
                         }
+
 						res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
 					}
 				});
@@ -272,33 +273,33 @@ module.exports = function(app, passport){
 		});
 
 
-		// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
-		app.post('/getauth/:meetingID', function (req, res) {
-			var meetingID = req.params.meetingID;
-			var userBusy = req.body.busy;
-			var userEmail = req.user.google.email;
+    // WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
+    app.post('/getauth/:meetingID', function (req, res) {
+        var meetingID = req.params.meetingID;
+        var userBusy = req.body.busy;
+        var userEmail = req.user.google.email;
 
-			Meeting.findById(meetingID, function(err,meeting){
-				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
-				meeting.save();
-			});
-		});
+        Meeting.findById(meetingID, function(err,meeting){
+            meeting.membersAccepted.push({email:userEmail, busy: userBusy});
+            meeting.save();
+        });
+    });
 
-	//MEETING PAGE
-	app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){
-		var groupID = req.params.groupID;
-		var meetingID = req.params.meetingID;
-		var user = req.user;
-		Meeting.findById(meetingID, function(err,meeting){
-			// load our meetingPage template using the meeting found in query.
+    //MEETING PAGE
+    app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){
+        var groupID = req.params.groupID;
+        var meetingID = req.params.meetingID;
+        var user = req.user;
+        Meeting.findById(meetingID, function(err,meeting){
+            // load our meetingPage template using the meeting found in query.
 
-			var startDate = meeting.startDay + " "+meeting.startTime;
-			var endDate = meeting.endDay + " " + meeting.endTime;
+            var startDate = meeting.startDay + " "+meeting.startTime;
+            var endDate = meeting.endDay + " " + meeting.endTime;
 
-			res.render('meetingPage.ejs',{meeting: meeting, user: user});
-		});
+            res.render('meetingPage.ejs',{meeting: meeting, user: user});
+        });
 
-	});
+    });
 
 
 //getFreetime page - displays possible meeting times
@@ -481,7 +482,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
             res.redirect('/getFreetime/'+meetingID+"/submit");
 
         });
-
+        
 
     });
 
@@ -493,7 +494,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
         res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
         });
     })
-
+    
     app.post('/submitted/:meetingID',function(req,res) {
         var startDayArray = [];
         var endDayArray = [];
@@ -504,7 +505,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
             res.redirect('/getFreetime/'+meetingID);
         });
     })
-
+    
 });
 
 

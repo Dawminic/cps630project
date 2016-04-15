@@ -59,7 +59,7 @@
       <table class="table">
           <thead>
           <tr>
-              <th></th>
+              <th>Slot</th>
               <th>Starting</th>
               <th>Ending</th>
 
@@ -93,7 +93,7 @@
                 Add to Google Calendar
             </button>
         </div>
-        <pre id="output"></pre>
+        <p id="output"></p>
 
     <% }%>
 
@@ -229,11 +229,8 @@
           });
 
           request.execute(function(resp) {
-              console.log(resp);
               $.post("/submitted/"+meetingid);
-              var ft = JSON.stringify(resp);
-              appendPre('FreeBusy Result');
-              appendPre(ft);
+              appendPre("The meeting information has been added to your calendar successfully!");
 
 
           });
