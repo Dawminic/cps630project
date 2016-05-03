@@ -13,7 +13,6 @@ var configAuth = require('./../config/auth');
 var google = require('googleapis');
 var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
 var gcal = require('google-calendar');
-var dateFormat = require('dateformat');
 require('datejs');
 
 
@@ -22,10 +21,6 @@ module.exports = function(app, passport){
 
 	app.get('/', function(req,res){
 		res.render("index.ejs");
-	});
-	
-	app.get('/help',isLoggedIn,function(req,res){
-		res.render("help.ejs", {user: req.user});
 	});
 
 //PROFILE PAGE
@@ -135,6 +130,7 @@ module.exports = function(app, passport){
 							//Find the user, and loop through their groups
 							//till you find the group to be removed, and 
 							//remove it
+							//if (members[i] == userToRemove) i++;;
 							User.findOne({"google.email": members[i]}, function (err, groupMember){	
 								var currMemberGroups = groupMember.google.groups;
 								for (var j=0; j<currMemberGroups.length; j++) {
@@ -343,19 +339,16 @@ module.exports = function(app, passport){
 
 				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
 				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
-                newMeeting.timeMax = fbTimeMax;
-                newMeeting.timeMin = fbTimeMin;
-                newMeeting.name = req.body.meetingName;
-                newMeeting.startDay = req.body.dateMin;
-                newMeeting.endDay = req.body.dateMax;
-                newMeeting.startTime = startTime;
-                newMeeting.endTime = finishTime;
-                newMeeting.group = groupID;
-                newMeeting.meetingMembers = group.members;
-                newMeeting.duration = req.body.meetingDuration;
-                newMeeting.location = req.body.meetingLocation;
-                newMeeting.moderator = req.user.google.email;
-                newMeeting.final = false;
+				newMeeting.timeMax = fbTimeMax;
+				newMeeting.timeMin = fbTimeMin;
+				newMeeting.name = req.body.meetingName;
+				newMeeting.startDay = req.body.dateMin;
+				newMeeting.endDay = req.body.dateMax;
+				newMeeting.startTime = startTime;
+				newMeeting.endTime = finishTime;
+				newMeeting.group = groupID;
+				newMeeting.meetingMembers = group.members;
+				newMeeting.duration = req.body.meetingDuration;
 				newMeeting.save(function(err){
 					if(err){
 						console.log(err);
@@ -508,12 +501,10 @@ module.exports = function(app, passport){
 		Meeting.findById(meetingID, function(err,meeting){
 			// load our meetingPage template using the meeting found in query.
 
-            var start = new Date(meeting.timeMin);
-            start = dateFormat(start, "dddd, mmmm dS, yyyy, h:MM:ss TT");
-            console.log(start);
-            var end = new Date(meeting.timeMax);
-            end = dateFormat(end, "dddd, mmmm dS, yyyy, h:MM:ss TT");
-            res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID, start: start, end: end});
+			var startDate = meeting.startDay + " "+meeting.startTime;
+			var endDate = meeting.endDay + " " + meeting.endTime;
+
+			res.render('meetingPage.ejs',{meeting: meeting, user: user, groupID: groupID});		
         });
 
 	});
@@ -791,7 +782,7 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
                 endDayArray.push(eFinal);
             }
         }
-        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
+        res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray});
         /*
         for(var i = 0; i < startDayArray.length; i++){
                 console.log("Possible Meeting Slot: " + i);
@@ -803,72 +794,23 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
          //   console.log(i + " " + totalHours[i]);
        // }
     });
-    /*
-     When moderator submits a final meeting time for the group.
-     */
-    app.post('/getFreetime/:meetingID',function(req,res){
-
-        var meetingID = req.params.meetingID;
-        var start = req.body.MeetingTime;
-
-
-
-        Meeting.findById(meetingID, function(err, meeting){
-            meeting.final = true;
-            start = new Date(start);
-            var temp = start;
-            temp = temp.toString(("yyyy-MM-ddTHH:mm:ss"));
-            temp = temp + "-04:00";
-
-            var end = start.addHours(meeting.duration).toString("yyyy-MM-ddTHH:mm:ss");
-            end = end + "-04:00" ;
-            meeting.timeMin = temp;
-            meeting.timeMax = end;
-            meeting.save();
-            res.redirect('/getFreetime/'+meetingID+"/submit");
-
-        });
-
-
-    });
-
-    app.get('/getFreetime/:meetingID/submit',isLoggedIn,function(req,res) {
-        var startDayArray = [];
-        var endDayArray = [];
-        var meetingID = req.params.meetingID;
-        Meeting.findById(meetingID, function(err, meeting){
-            res.render('getFreetime.ejs',{startDays: startDayArray, endDays: endDayArray, user: req.user, meeting: meeting});
-        });
-    })
-
-    app.post('/submitted/:meetingID',function(req,res) {
-        var startDayArray = [];
-        var endDayArray = [];
-        var meetingID = req.params.meetingID;
-        Meeting.findById(meetingID, function(err, meeting){
-            meeting.submittedUsers.push(req.user.google.email);
-            meeting.save();
-            res.redirect('/getFreetime/'+meetingID);
-        });
-    })
-
 });
 
 
 
 
 //LOGOUT
-    // when the user clicks the logout button:
-    // logout session and send them back to hoome page.
-    app.get('/logout',function(req, res){
-        req.logout();
-        res.redirect('/');
+	// when the user clicks the logout button:
+		// logout session and send them back to hoome page.
+	app.get('/logout',function(req, res){
+		req.logout();
+		res.redirect('/');
 
-    });
+	});
 
 
 
-    // =====================================
+	// =====================================
     // GOOGLE ROUTES =======================
     // =====================================
     // send to google to do the authentication
@@ -878,16 +820,16 @@ app.get('/getFreetime/:meetingID',isLoggedIn,function(req,res){
     app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email', 'https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar'] }));
     // the callback after google has authenticated the user
     app.get('/auth/google/callback',
-        passport.authenticate('google', {
-            successRedirect : '/profile',
-            failureRedirect : '/'
-        }));
+            passport.authenticate('google', {
+                    successRedirect : '/profile',
+                    failureRedirect : '/'
+            }));
 }
 
 
 //Check to make sure the user is logged in before moving on to next step.
 function isLoggedIn(req,res,next){
-    if(req.isAuthenticated())
-        return next();
-    res.redirect('/');
+	if(req.isAuthenticated())
+		return next();
+	res.redirect('/');
 }
