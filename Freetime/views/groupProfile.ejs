@@ -1,126 +1,135 @@
+<!--  
+    FreeTime View - groupProfile.ejs
+    Creators: Mark Stanley, Dominic Poku-Aidoo, Rogerio Ribeiro, Ryan Sunico
+
+    The user has access to this view, when they have created a group.
+    Included in this view are, the option to create a meeting, going back to profile, logout, see group memebers, see meetings on group calendar, notifications to when they've been added to a group/meeting and ability to remove self from group. 
+-->
+
+
 <!DOCTYPE html>
 <!-- views/groupProfile.ejs -->
 <html lang="en">
 <head>
-    <title>GroupProfile</title>
+    <meta charset="utf-8">
+    <title>Group Profile</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.css">
 
     <!-- JQuery CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css">
 
     <!-- Custom CSS -->
     <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
     <link href="/public/stylesheets/notifications.css" rel="stylesheet">
+    <link href="/public/stylesheets/group_profile.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
 
-    <style>
-/*        body        { padding-top:80px; word-wrap:break-word; }*/
-        
-        /*PUT EVERYTHING BELOW INTO A CSS AFTERWARDS*/
-        p#basicExample input {
-            width: 30%;
-            display: inline-block;
-        }
-        
-        .border {
-            width: 100%;
-            position: relative;  
-            margin-left: auto; 
-            margin-right: auto; 
-            top: -60%; 
-            font-family:Arial; 
-            font-size:20;
-            border-bottom: solid #DCDCDC;
-            border-spacing: 50px 100px;
-            text-align: center;
-        }
-        
-        .border h1{
-            text-align: left;
-        }
-        
-        .border a {
-            text-decoration: none;
-        }
-        
-        .border-bottom {
-            border-bottom-style: solid;
-            border-bottom-width: 1px;
-            border-bottom-color: #DCDCDC;
-            margin-top: 2.5%;
-        }
-        
-    </style>
 </head>
 <body>
+<!-- Wrapper -->
 <div id="wrapper">
         
-        <div class="overlay" ></div>
-        <ul id="nav">
-            <li id="notification_li">
+    <div class="overlay" ></div>
+    
+    <!-- Notifications(Group/Meetings) -->
+    <ul id="nav">
+        <li id="notification_li">
             <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
-            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group"></i></a>
-            </li>
+            <a href="#" id="groupnotificationLink"><i class="fa fa-group" aria-hidden="true" id="font-group"></i></a>
+        </li>
 
-            <li id="notification_li">
-                <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
-                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar"></i></a>
+        <li id="notification_li">
+            <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
+            <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" aria-hidden="true" id="font-calendar"></i></a>
+        </li>
+    </ul>
+
+    <!-- Sidebar Navigation-->
+    <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+        <ul class="nav sidebar-nav">
+            <li class="sidebar-brand">
+                <h3><%= group.name %></h3>
+            </li>
+            <li>
+                <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-caret-down" aria-hidden="true"></i> Show Group Members</a>
+              <ul class="dropdown-menu" role="menu">
+                <li class="dropdown-header">Members currently in this group: </li>
+                <% for(var i=0; i<group.members.length; i++) {%>
+                  <li><p><%= group.members[i] %></p></li>
+                <% } %>
+              </ul>
+            </li>
+            <li>
+                <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Find A Meeting</a>
+            </li>
+            <li>
+                <a href="#" data-toggle="modal" data-target="#leaveGroupModal"><i class="fa fa-remove" aria-hidden="true"></i> Leave Group</a>
+            </li>
+            <li>
+                <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
             </li>
         </ul>
-        <!-- Sidebar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-            <ul class="nav sidebar-nav">
-                <li class="sidebar-brand">
-                    <h3><%= group.name %></h3>
-                </li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span>Group Members</a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li class="dropdown-header">Members currently in this group: </li>
-                    <% for(var i=0; i<group.members.length; i++) {%>
-                      <li><p><%= group.members[i] %></p></li>
-                    <% } %>
-                  </ul>
-                </li>
-                <li>
-                    <a data-toggle="modal" data-target="#myModal">Create New Meeting</a>
-                </li>
-                <li>
-                    <a href="/logout">Logout</a>
-                </li>
-            </ul>
-        </nav>
-        <!-- /#sidebar-wrapper -->
+    </nav>
+    <!-- /#sidebar-wrapper -->
 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
-                <span class="hamb-top"></span>
-                <span class="hamb-middle"></span>
-                <span class="hamb-bottom"></span>
-            </button>
-            <div class="container">
-                <div class="page-header text-center">
-                    <h2><%= group.name %></h2>
-                    <a href="/profile" class="btn btn-default btn-sm">Profile</a>
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+            <span class="hamb-top"></span>
+            <span class="hamb-middle"></span>
+            <span class="hamb-bottom"></span>
+        </button>
+        <div class="container">
+            <div class="page-header text-center">
+                <h2><%= group.name %></h2>
+            </div>
+            <% for(var i = 0; i < group.meetings.length; i++) { %>
+                <div class="border">
+                    <h1><%= group.meetings[i].meetingName%></h1>
+                    <br><br><p><i class="fa fa-calendar"></i> The scheduled date for this meeting is on: <%= group.meetings[i].startDay%></p>
+                    <br><br><p><i class="fa fa-clock-o"></i> The meeting will be held from: <%= group.meetings[i].startTime%> to <%= group.meetings[i].endTime%></p>
+                    <br><br><a href='/meetingPage/<%=group.id%>/<%=group.meetings[i].meetingID%>' id="meetingPage">Click here to be redirected...</a>
+                    <div class="border-bottom"></div>
                 </div>
-                <% for(var i = 0; i < group.meetings.length; i++) { %>
-                    <div class="border">
-                        <h1><%= group.meetings[i].meetingName%></h1>
-                        <br><br><p><i class="fa fa-calendar"></i> The scheduled date for this meeting is on: <%= group.meetings[i].startDay%></p>
-                        <br><br><p><i class="fa fa-clock-o"></i> The meeting will be held from: <%= group.meetings[i].startTime%> to <%= group.meetings[i].endTime%></p>
-                        <br><br><a href='/meetingPage/<%=group.id%>/<%=group.meetings[i].meetingID%>' id="meetingPage">Click here to be redirected...</a>
-                        <div class="border-bottom"></div>
+          <%}%>
+            
+            <div id='calendar'></div>
+        </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+
+   <!-- Create Leave Group Btn & Modal -->
+    <div id="leaveGroupModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Leave Group</h4>
+            </div>
+                <form action="/leaveGroup/<%=group.id%>" method="post" id="thisForm">
+                    <div class="modal-body">
+                    <div class="form-group">
+                        <label>Are you sure you would like to remove yourself from this group?</label>
                     </div>
-              <%}%>
-                
-                <div id='calendar'></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger btn-lg" id="yesRemove">Yes</button>
+                        <button type="button" data-dismiss="modal" class="btn btn-default btn-lg" id="noRemove">No</button>
+                    </div>
+                </form>
             </div>
         </div>
-        <!-- /#page-content-wrapper -->
+    </div>
+    <!-- /.modal -->
 
     <!-- Create Group Btn & Modal -->
     <div id="myModal" class="modal fade" role="dialog">
@@ -129,14 +138,17 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Create New Meeting</h4>
+                    <h4 class="modal-title">Find A Meeting</h4>
                 </div>
                 <form method="post">
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Meeting Name</label>
                             <input type="text" class="form-control" name="meetingName" id="meetingName" required>
-							<label id="errorMessageMeetingName" style="color:red;"></label>
+    						<label id="errorMessageMeetingName" style="color:red;"></label>
+                            <br>
+                            <label>Location</label>
+                            <input type="text" class="form-control" name="meetingLocation" required>
                             <br>
                             <label>Duration (in hours)</label>
                             <input type="number" class="form-control" min="1" name="meetingDuration" required>
@@ -151,35 +163,34 @@
                                 <input type="text" class="time end form-control" name="timeMax"  required/>
                             </p>
                         </div>
-                        <!-- /#modal-body -->
+                        <!-- /.form-group -->
                     </div>
-                    <!-- /#form-group -->
+                    <!-- /.modal-body -->
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-warning btn-lg" id="thisButton">Create</button>
                     </div>
                 </form>
 
             </div>
-            <!-- /#modal-content-->
+            <!-- /.modal-content-->
         </div>
-        <!-- /#modal-dialog  -->
+        <!-- /.modal-dialog  -->
     </div>
     <!-- /.modal fade-->
-    </div>
-    <!-- /#wrapper
-
-    <!--
-        Import Script Files:
-        - Jquery js
-        - Bootstrap js
-    -->
-
+</div>
+<!-- /#wrapper -->
+    
+    <!-- JQuery Scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.js"></script>
+
+    <!-- Bootstrap Scripts -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
+
+    <!-- Other Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
 
     <script>
@@ -212,6 +223,8 @@
                 hamburger_cross();
             });
 
+            // menu button for the sidebar
+            // toggles the sidebar to show and than dissapear
             function hamburger_cross() {
 
               if (isClosed == true) {
@@ -296,36 +309,14 @@
             
             $('#calendar').fullCalendar({
                 // put your options and callbacks here
-                 dayClick: function() {
-                    alert('a day has been clicked!');
-                },
-                events: [
-                    {
-                        title  : 'event1',
-                        start  : '2016-04-13'
-                    },
-                    {
-                        title  : 'event2',
-                        start  : '2016-04-18',
-                        end    : '2016-04-22'
-                    },
-                    {
-                        title  : 'event3',
-                        start  : '2010-01-09T12:30:00',
-                        allDay : false // will make the time show
-                    }
-                ]
+                events: [{
+                    title: 'event1',
+                    start: '2016-04-16',
+                    color: 'yellow'
+                }]
             })
             
         });
-
-//        $("#members-show").click(function(e) {
-//            e.preventDefault();
-//            var date = $("#start").val();
-//            var end = $("#end").val();
-//            console.log(date.split("/"));
-//            console.log(end.split("/"));
-//        });
     </script>
 
 </body>

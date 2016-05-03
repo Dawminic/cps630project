@@ -13,11 +13,13 @@
     "google-auth-library": "^0.9.7",
     "google-calendar": "latest",
     "googleapi": "latest",
+    "googleapis": "^5.0.0",
     "method-override": "~1.0.0",
     "mongoose": "~3.8.1",
     "morgan": "~1.0.0",
     "passport": "~0.1.17",
     "passport-google-oauth": "~0.1.5",
-    "passport-google-oauth20": "^1.0.0"
+    "passport-google-oauth20": "^1.0.0",
+    "dateformat": "~1.0.12"
   }
 }

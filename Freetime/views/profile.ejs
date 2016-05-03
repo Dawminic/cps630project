@@ -1,14 +1,17 @@
+<!--  
+    FreeTime View - profile.ejs
+    Creators: Mark Stanley, Dominic Poku-Aidoo, Rogerio Ribeiro, Ryan Sunico
+
+    The user has access to this view, when they have signed into the Freetime application.
+    Included in this view are, the option to create a group, logout, see groups, notifications to when they've been added to a group/meeting and ability to delete account. 
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
     <title><% user.google.name %> Profile Page</title>
 
     <!-- Bootstrap Core CSS -->
@@ -17,72 +20,31 @@
 
     <!-- Custom CSS -->
     <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
-    <style>
-        /* PUT IN A CSS FILE */
-        div h1{
-            margin-left: 1.5%;
-        }
-        
-        #group-container {
-/*            text-align: center;*/
-            margin-top: 10%;
-        }
-        
-        td, th {
-          border: 1px solid #999;
-          padding: 0.5rem;
-        }
-        
-        table{
-            width: 100%;
-        }
-        
-        @media (max-width: 800px) {
-            
-            #group-container {
-    /*            text-align: center;*/
-                margin-top: 15%;
-            }
-
-            table {
-                width: 90%;
-                height: 100%;
-                margin-left: auto; 
-                margin-right: 7.5%;
-            }
-            
-            div h1{
-                margin-left: 5%;
-            }
-        }
-    </style>
+    <link href="/public/stylesheets/notifications.css" rel="stylesheet">
+    <link href="/public/stylesheets/profile_style.css" rel="stylesheet">
     
     <!-- Fonts -->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
 
 </head>
 
 <body>
 
 <div id="wrapper">
-
+        
+        <!-- Blurs content when accessing sidebar. -->
         <div class="overlay"></div>
+
+        <!-- Notifications(Group/Meetings) -->
         <ul id="nav">
             <li id="notification_li">
             <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
-            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group"></i></a>
+            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group" aria-hidden="true"></i></a>
             </li>
 
             <li id="notification_li">
                 <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
-                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar"></i></a>
+                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar" aria-hidden="true"></i></a>
             </li>
         </ul>
 
@@ -97,6 +59,12 @@
                 </li>
                 <li>
                     <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Create New Group</a>
+                </li>
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#delFreeTime"><i class="fa fa-remove" aria-hidden="true"></i> Delete Account</a>
+                </li>
+				<li>
+                    <a href="/help"><i class="fa fa-info-circle" aria-hidden="true"></i> Help</a>
                 </li>
                 <li>
                     <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
@@ -147,6 +115,31 @@
         </div>
         <!-- /#page-content-wrapper -->
 
+		<!-- Create Delete FreeTime Account Btn & Modal -->
+			<div id="delFreeTime" class="modal fade" role="dialog">
+				<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Delete FreeTime Account</h4>
+					</div>
+						<form action="/deleteAccount" method="post" id="thisForm">
+							<div class="modal-body">
+							<div class="form-group">
+								<label>Are you sure you would like to delete your FreeTime Account?</label>
+							</div>
+							</div>
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-danger btn-lg" id="yesRemove">Yes</button>
+								<button type="button" data-dismiss="modal" class="btn btn-default btn-lg" id="noRemove">No</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		<!-- /#modal -->
+
         <!-- Create Group Btn & Modal -->
         <div id="myModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -176,7 +169,7 @@
         </div>
         <!-- /#modal -->
     </div>
-    <!-- /#wrapper
+    <!-- /#wrapper -->
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
@@ -185,17 +178,17 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
     <!-- Menu Toggle Script -->
     <script>
         //REGEX Check
         function isValidEmailAddress(emailAddress) {
-            var pattern = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@gmail.com/i;
+            var pattern = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@(?:gmail.com|ryerson.ca)/i;
             return pattern.test(emailAddress);
         };
 
         $(document).ready(function () {
+            // Start of SideBar navigation toggle
             var trigger = $('.hamburger'),
                 overlay = $('.overlay'),
                 isClosed = false;
@@ -222,8 +215,9 @@
             $('[data-toggle="offcanvas"]').click(function () {
                 $('#wrapper').toggleClass('toggled');
             });
+            //End of SideBar toggle
 
-            // Toggle information
+            // Toggle group information
             $('#group-show').click(function(){
                 $('#user-group-information').toggle();
             });
@@ -244,13 +238,34 @@
 				
 				//Email validation
 		        var values = $("#groupEmails").val().split(",");
+				var userList = "<%=userList%>";
+				var currUserList = userList.split(",");
                 for(i=0; i<values.length; i++){
-                    if( !isValidEmailAddress( values[i] ) ) {
-                        $('#errorMessage').html("Sorry, " + values[i] + " is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
-//                        alert("This is not an email!");
-                        e.preventDefault();
-                    }
+                    // For error checking
+                    // e.preventDefault();
+                    
+					//If user tries to create a group with no members display an error message
+					if (values[i] == ""){
+						$('#errorMessage').html("Please add members to your group");
+						e.preventDefault();
+					}	
+					else {
+						
+						if( !isValidEmailAddress( values[i] ) ) {
+							
+							$('#errorMessage').html("Sorry, '" + values[i] + "' is not an email or is not a gmail! Please remove it and enter a proper email like (Ex: example@gmail.com)");
+							e.preventDefault();
+						}
+						
+						//If group member does NOT have a Freetime account, notify user which member does not have an account
+						else if ( currUserList.indexOf(values[i]) == -1 ){
+							$('#errorMessage').html("Sorry, '" + values[i] + "' does not have a Freetime account. Please enter a valid account.");
+							e.preventDefault();
+						}
+					}
                 }
+				
+				
             });
             
             //Show Group Notification

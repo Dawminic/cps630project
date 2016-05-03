@@ -1,0 +1,32 @@
+p#basicExample input {
+    width: 30%;
+    display: inline-block;
+}
+
+.border {
+    width: 100%;
+    position: relative;  
+    margin-left: auto; 
+    margin-right: auto; 
+    top: -60%; 
+    font-family:Arial; 
+    font-size:20;
+    border-bottom: solid #DCDCDC;
+    border-spacing: 50px 100px;
+    text-align: center;
+}
+
+.border h1{
+    text-align: left;
+}
+
+.border a {
+    text-decoration: none;
+}
+
+.border-bottom {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: #DCDCDC;
+    margin-top: 2.5%;
+}

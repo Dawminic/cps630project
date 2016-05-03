@@ -1,12 +1,16 @@
+<!--  
+    FreeTime View - index.ejs
+    Creators: Mark Stanley, Dominic Poku-Aidoo, Rogerio Ribeiro, Ryan Sunico
+
+    The homepage of Freetime, that allows the user to login and shows them the reason for the creation of Freetime and the about the team.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>Welcome Page</title>
 
     <!-- Bootstrap Core CSS -->
@@ -19,17 +23,11 @@
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
     <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
 </head>
 
 <body>
-
+    
+    <!-- Navigation of home page -->
     <nav class="navbar navbar-default" id="nav-id" role="navigation">
         <div class="container topnav">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -60,15 +58,15 @@
         <!-- /.container -->
     </nav>
 
-        <!-- Header -->
-    <a name="sign-in"></a>
+    <!-- Header -->
+    <a name="sign-in"></a> <!-- Fast Access to sign-in -->
     <div class="intro-header">
         <div class="container">
 
             <div class="row">
                 <div class="col-lg-12">
                     <div class="intro-message">
-                        <h1 id="logoColor">FreeTime</h1>
+                        <h1 id="logoColor">FreeTime<sup style="font-size:14px">[BETA]</sup></h1>
                         <p id="logoColor">Schedule group meetings within minutes.</p>
                         <hr class="intro-divider">
                         <h3 id="logoColor">Login with your Google Account:</h3>
@@ -88,8 +86,7 @@
     <!-- /.intro-header -->
 
     <!-- Page Content -->
-
-    <a  name="services"></a>
+    <a  name="services"></a> <!-- Fast Access to services -->
     <div class="content-section-a">
 
         <div class="container">
@@ -111,64 +108,51 @@
     </div>
     <!-- /.content-section-a -->
 
-    <a  name="about"></a>
-        <!-- content-section-b -->
-        <div class="content-section-b">
-            
-            <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="page-header" id="header">Meet Our Team</h1>
-                </div>
+    <a  name="about"></a> <!-- Fast Access to about -->
+    <!-- content-section-b -->
+    <div class="content-section-b">
+        
+<!--         <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header" id="header">Meet Our Team</h1>
             </div>
+        </div> -->
 
-            <div class="aboutus-container">
-                <!-- Team Members Row -->
-                <div class="row">
-                    <div class="col-md-4 text-center">
-                        <h3>Mark Stanley
-                            <hr id="aboutus-divider">
-                            <small>Fullstack Developer</small>
-                        </h3>
-                        <p>Responsible for website's architecture and back end development.</p>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <h3>Dominic Poku-Aidoo
-                            <hr id="aboutus-divider">
-                            <small>Fullstack Developer</small>
-                        </h3>
-                        <p>Responsible for notifications and manipulation of database.</p>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <h3>Ana Alfonso Leon
-                            <hr id="aboutus-divider">
-                            <small>Quality Assurance</small>
-                        </h3>
-                        <p>Responsible for preventing mistakes or defects.</p>
-                    </div>
-                    <div class="bottomColumns text-center">
-                        <h3>Ryan Sunico
-                            <hr id="aboutus-divider">
-                            <small>Documentation</small>
-                        </h3>
-                        <p>Responsible for documentation of the website and minor coding.</p>
-                    </div>
-                     <div class="bottomColumns text-center">
-                        <h3>Rogerio Ribeiro
-                            <hr id="aboutus-divider">
-                            <small>Web Designer/GUI</small>
-                        </h3>
-                        <p>Responsible for the design of the all pages and the user interface when creating meeting and groups.</p>
-                    </div>
-                </div>
+        <div class="border row aboutus-container">
+            <div class="border col-md-3 quarter text-center">
+                <h3>Mark Stanley
+                    <hr id="aboutus-divider">
+                    <small>Fullstack Developer</small>
+                </h3>
+                <p>Responsible for website's architecture and back end development.</p>
             </div>
-                
+            <div class="border col-md-3 quarter text-center">
+                <h3>Dominic Poku-Aidoo
+                    <hr id="aboutus-divider">
+                    <small>Fullstack Developer</small>
+                </h3>
+                <p>Responsible for notifications and manipulation of database.</p>
+            </div>
+            <div class="border col-md-3 quarter text-center">
+                <h3>Ryan Sunico
+                    <hr id="aboutus-divider">
+                    <small>Documentation</small>
+                </h3>
+                <p>Responsible for documentation of the website and minor coding.</p>
+            </div>
+            <div class="border col-md-3 quarter text-center">
+                <h3>Rogerio Ribeiro
+                    <hr id="aboutus-divider">
+                    <small>Web Designer/GUI</small>
+                </h3>
+                <p>Responsible for the design of the all pages and the user interface when creating meeting and groups.</p>                
+            </div>
         </div>
-        <!-- /.content-section-b -->
+    </div>
+    <!-- /.content-section-b -->
 
     <footer>
-<!--        <div class="container">-->
             <div class="row">
-<!--                <div class="col-lg-12 pull-left">-->
                     <ul class="list-inline pull-left" style="margin-left: 5%;">
                         <li>
                             <a href="#">Home</a>
@@ -183,13 +167,16 @@
                         </li>
                     </ul>
                     <p class="pull-right" style="margin-right: 5%;">Feel free to contact us and give feedback at <i class="fa fa-envelope" aria-hidden="true"> freetime630ru@gmail.com</i></p>
-<!--                </div>-->
             </div>
             <p class="copyright text-muted small" style="margin-left:2.5%">Copyright &copy; FreeTime 2016. All Rights Reserved</p>
-<!--        </div>-->
     </footer>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- Bootstrap -->
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    </body>
+</body>
+
 </html>
