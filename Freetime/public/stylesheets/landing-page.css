@@ -3,9 +3,15 @@
  * Code licensed under the Apache License v2.0.
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
+
+/* Fonts */
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans);
 @import url(https://fonts.googleapis.com/css?family=Playfair+Display);
+@import url(https://fonts.googleapis.com/css?family=Lobster+Two);
+@import url(https://fonts.googleapis.com/css?family=Oswald:300);
+@import url(https://fonts.googleapis.com/css?family=Pontano+Sans);
 
+/* Main */
 html,body {
         padding:0;
         margin:0;
@@ -24,6 +30,7 @@ h6 {
     font-weight: 700;
 }
 
+/* Top Navigation */
 .navbar-default{
     background-color: white;
     border-color: white;
@@ -47,10 +54,18 @@ h1#logoColor {
     font-family: 'Josefin Sans', sans-serif;
 }
 
+@media(max-width:767px) {
+    h1#logoColor {
+        font-size: 50px;
+    }
+}
 .topnav {
     font-size: 14px;
 }
 
+#fade-in li a {
+    opacity: 0;
+}
 /* Top Nav Title (Overrides Bootstrap)*/
 a#logoColor{
     color: #2B78C2;
@@ -63,7 +78,6 @@ p#logoColor {
     margin-bottom: 5%;
     font-style: italic;
     letter-spacing: 5px;
-/*    font-family: 'Playfair Display', serif;*/
 }
 
 h3#logoColor {
@@ -75,6 +89,7 @@ h3#logoColor {
     font-weight: 400;
 }
 
+/* Jumbotron */
 .intro-header {
     padding-top: 0; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
     padding-bottom: 0;
@@ -141,6 +156,18 @@ h3#logoColor {
     padding-top: 10%;
     padding-bottom: 10%;
     background-color: #e4e4e4;
+    /*background-color: #46AAD9;*/
+}
+
+div.content-section-a h2 {
+    font-family: 'Amatic SC', cursive;
+    font-size: 40px;
+}
+
+div.content-section-a p {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 18px;
+    margin-top: 5%;
 }
 
 #freetime {
@@ -153,65 +180,41 @@ h3#logoColor {
         margin-right: auto;
     }
 }
+
 /* Section B */
 .content-section-b {
     font-size: 24px;
     padding: 50px 0;
     border-top: 1px solid #e7e7e7;
     border-bottom: 1px solid #e7e7e7;
-    background-color: #428BCF;
+    /*background-color: #428BCF;*/
+    background-color: #46AAD9;
 }
 
-.section-heading {
-    font-size: 32px;
+div.content-section-b h1 {
+    font-family: 'Lobster Two', cursive;
+    font-size: 40px;
 }
 
-.section-heading-spacer {
-    float: left;
-    width: 200px;
-    border-top: 3px solid white;
+.header-line {
+    width: 50%; 
 }
 
-/* About Section */
-.bottomColumns {
-    margin-top: 5%;
-    width: 50%;
-    float: left;
-}
-
-@media(max-width:1299px) {
-    .bottomColumns {
-        margin-top: 0;
-        width: 100%;
-    }
-}
-
-@media(min-width: 1800px){
-    .bottomColumns {
-        margin-right: 5%;
-        width: 45%;
-    }
-}
+/* About Us Section */
 .aboutus-container {
     margin-top: 2.5%;
     width: 100%;
 }
 
+div.aboutus-container h3 {
+    font-family: 'Lobster Two', cursive;
+}
+
 div.aboutus-container p{
     color: white;
-}
-
-div.aboutus-container small{
-    color: lightcyan;
-    font-style: italic;
-    letter-spacing: 2px;
-}
-h1#header, h2#header{
-    margin-left: 2.5%;
-}
-
-p#text {
-    margin-left: 2.5%;
+    font-size: 18px;
+    font-family: 'Pontano Sans', sans-serif;
+    margin-top: 4.5%;
 }
 
 #aboutus-divider {
@@ -222,18 +225,14 @@ p#text {
     margin-top: 12.5%;
 }
 
-.quarter{
-    width:45%;
-    height:100%;
-    /*float:left;*/
-    margin-left: 2.5%;
+.img-center {
+    margin: 0 auto;
 }
 
-footer {
-    padding: 50px 0;
-    background-color: #e4e4e4;
-}
-
-p.copyright {
-    margin: 15px 0 0;
+.small-text {
+    color: lightcyan;
+    font-size: 14px;
+    font-style: italic;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 2px;
 }
