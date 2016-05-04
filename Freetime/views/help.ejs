@@ -1,0 +1,177 @@
+<!--  
+    FreeTime View - help.ejs
+    Creators: Mark Stanley, Dominic Poku-Aidoo, Rogerio Ribeiro, Ryan Sunico
+
+    The use can access this view when they need help with setting up their google calendar privacy to work with Freetime.
+    The user has access to going back to profile, logging out, and ability to see notifications when added to a group/meeting.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    <!-- views/help.ejs -->
+    <head>
+        <title>Help Page</title>
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+        
+        <!-- Custom CSS -->
+        <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
+        <link href="/public/stylesheets/notifications.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    </head>
+    
+    <body>
+    <div id="wrapper">
+        
+        <div class="overlay"></div>
+        <!-- Notifications(Group/Meetings) -->
+        <ul id="nav">
+            <li id="notification_li">
+                <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
+                <a href="#" id="groupnotificationLink"><i class="fa fa-group" aria-hidden="true" id="font-group"></i></a>
+            </li>
+
+            <li id="notification_li">
+                <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
+                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" aria-hidden="true" id="font-calendar"></i></a>
+            </li>
+        </ul>
+
+        <!-- Sidebar Navigation-->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <h3><%= user.google.name %></h3>
+                </li>
+                <li>
+                    <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
+                </li>
+                <li>
+                    <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+                <span class="hamb-middle"></span>
+                <span class="hamb-bottom"></span>
+            </button>
+            <div class="container">
+                <div class="page-header text-center">
+                    <h2>How to give Freetime permission to your Google Calendar</h2>
+                </div>
+
+                <div align="center">
+                    <p>First go to your Google Calendar</p>
+                    <img src="http://s30.postimg.org/hg68oh0i9/image.png" alt="Step 1" width="600" height="400">
+                    <p><br>Then go to the calendar you want to give Freetime permission to</p>
+                    <img src="http://s30.postimg.org/ko64nrxe9/image.png" alt="Step 2" width="600" height="400">
+                    <p><br>Go ahead and set the option to share your calendar! Don't worry, we can only see WHEN you're busy and not what you're doing at those times</p>
+                    <img src="http://s21.postimg.org/q1imrt90n/image.png" alt="Step 3" width="600" height="400">
+                    <p>If you are using your @ryerson.ca account, the option to set your permission looks a bit different then above</p>
+                    <img src="http://s28.postimg.org/497fb84b1/image.png" alt="Step 4" width="600" height="200">
+                </div>
+
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+        
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Start of SideBar navigation toggle
+                var trigger = $('.hamburger'),
+                    overlay = $('.overlay'),
+                    isClosed = false;
+
+                trigger.click(function () {
+                    hamburger_cross();
+                });
+
+                function hamburger_cross() {
+
+                  if (isClosed == true) {
+                    overlay.hide();
+                    trigger.removeClass('is-open');
+                    trigger.addClass('is-closed');
+                    isClosed = false;
+                  } else {
+                    overlay.show();
+                    trigger.removeClass('is-closed');
+                    trigger.addClass('is-open');
+                    isClosed = true;
+                  }
+                }
+
+                $('[data-toggle="offcanvas"]').click(function () {
+                    $('#wrapper').toggleClass('toggled');
+                });
+                //End of SideBar toggle
+
+                //Show Group Notification
+                $("#groupnotificationLink").click(function(){
+                    $.growl({
+                        title: '<h2 id="group-header">Group Notification</h2>',
+                        message: 'You are currently included in ' + <%= user.google.notifications.groupNotif %> + ' group(s).'
+                    },{
+                        type: 'group',
+                        position: {
+                        from: "bottom",
+                        align: "right"
+                    },
+                        delay: 10000,
+                    });
+                    
+                    $("#group_notif_count").fadeOut("slow");
+                    $.get("/resetgroupNotifs");
+                });
+                
+                //Hide notification if their is nothing to notify.
+                if(<%= user.google.notifications.groupNotifCount %> == 0 ){
+                    $("#group_notif_count").hide();
+                }
+                
+                //Show Meeting Notification
+                $("#meetnotificationLink").click(function(){
+                    $.growl({
+                        title: '<h2 id="meeting-header">Meeting Notification</h2>',
+                        message: 'You currently have ' + <%= user.google.notifications.meetingNotif %> + ' meetings.'
+                    }, {
+                        type: 'meeting',
+                        position: {
+                            from: "bottom",
+                            align: "right"
+                        },
+                        delay: 10000
+                    });
+                    
+                    $("#meet_notif_count").fadeOut("slow");
+                    $.get("/resetmeetingNotifs");
+                    console.log(<%= user.google.notifications.groupNotifCount %>);
+                    
+                });
+                
+                //Hide notification if their is nothing to notify.
+                if(<%= user.google.notifications.meetingNotifCount %> == 0){
+                    $("#meet_notif_count").hide();
+                }
+
+            });
+        </script>
+    </div>
+    </body>
+</html>

@@ -1,61 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
 <!-- views/groupProfile.ejs -->
+<html lang="en">
 <head>
-    <title>Meeting Page</title>
-    
+    <title>Meeting Profile</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.css">
+
+    <!-- JQuery CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css">
+
     <!-- Custom CSS -->
     <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
-
+    <link href="/public/stylesheets/notifications.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
 
     <style>
-        body        { padding-top:80px; word-wrap:break-word; }
+/*        body        { padding-top:80px; word-wrap:break-word; }*/
+        .border {
+            width: 100%;
+            position: relative;  
+            margin-left: auto; 
+            margin-right: auto; 
+            top: -60%; 
+            font-family:Arial; 
+            font-size:20;
+            border: solid #2B78C2;
+            border-radius: 20px;
+            border-spacing: 50px 100px;
+            text-align: center;
+        }
+        
+        .border h1{
+            text-align: left;
+        }
+        
+        .border a {
+            text-decoration: none;
+        }
+        
     </style>
 </head>
 <body>
-<div class="container">
+<div id="wrapper">
+        
+        <div class="overlay" ></div>
+        <ul id="nav">
+            <li id="notification_li">
+            <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
+            <a href="#" id="groupnotificationLink"><i class="fa fa-group" aria-hidden="true" id="font-group"></i></a>
+            </li>
 
-    <div class="page-header text-center">
-        <h1><span></span> Meeting Page</h1>
-        <h2>Meeting Name: <%= meeting.name %>
-        <p id="timeMin" style="display: none"><%=meeting.timeMin%></p>
-            <p id="Useremail" style="display:none"><%=user.google.email%></p>
-            <p id="timeMax" style="display: none"><%=meeting.timeMax%></p>
-            <p id="meetingID" style="display:none"><%=meeting.id%></p>
-        </h2>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
-        <a href="/profile" class="btn btn-default btn-sm">Profile</a>
-        <a href='/groupProfile/<%=meeting.group%>' class="btn btn-default btn-sm">Group</a>
-		<a data-toggle="modal" data-target="#leaveMeetingModal" class="btn btn-danger btn-sm">Not Attending</a>
+            <li id="notification_li">
+                <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
+                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" aria-hidden="true" id="font-calendar"></i></a>
+            </li>
+        </ul>
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <h3><%= meeting.name %></h3>
+                </li>
+                <li>
+                    <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
+                </li>
+                <li>
+                    <a href="/groupProfile" ><i class="fa fa-group" aria-hidden="true"></i> Go To Group</a>
+                </li>
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#leaveMeetingModal"><i class="fa fa-remove" aria-hidden="true"></i> Not Attending</a>
+                </li>
+                <li>
+                    <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /#sidebar-wrapper -->
 
-    </div>
-	</div>
-		<p>New Groups: <%= user.google.notifications.groupNotif %></p>
-		<p>New Meetins: <%= user.google.notifications.meetingNotif %></p>
-	<div>
-    <h1><u>Meeting Details</u></h1>
-    <h4>Meeting will be held between:</h4>
-    <h4>Duration: <%=meeting.duration%> hrs</h4>
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+                <span class="hamb-middle"></span>
+                <span class="hamb-bottom"></span>
+            </button>
+            <div class="page-header text-center">
+                <h2><%= meeting.name %>
+                <p id="timeMin" style="display: none"><%=meeting.timeMin%></p>
+                    <p id="Useremail" style="display:none"><%=user.google.email%></p>
+                    <p id="timeMax" style="display: none"><%=meeting.timeMax%></p>
+                    <p id="meetingID" style="display:none"><%=meeting.id%></p>
+                </h2>
 
-    <!-- check to see if all members generated FreeBusy Query-->
-    <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
-      <p>All members accepted</p>
-      <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
-    <%} else {%>
-      <p> Sorry still waiting on members to submit times</p>
-          <div id="authorize-div">
-              <span>Authorize access to Google Calendar API</span>
-              <!--Button for the user to click to initiate auth sequence -->
-              <button id="authorize-button" onclick="handleAuthClick(event)">
-                Authorize
-              </button>
             </div>
-            <pre id="output"></pre>
-    <%}%>
+            <div class="container">
+                <div class="border">
+                    <h4>Meeting will be held between:</h4>
+                    <h4>Duration: <%=meeting.duration%> hrs</h4>
+                    <hr style="width: 50%; border-color: inherit; color: #2B78C2">
+
+                    <!-- check to see if all members generated FreeBusy Query-->
+                    <% if(meeting.meetingMembers.length == meeting.membersAccepted.length) { %>
+                      <p>All members accepted</p>
+                      <a href="/getFreetime/<%=meeting.id%>" class="btn btn-default btn-sm">Possible Meeting Times</a>
+                        
+                    <%} else {%>
+                      <p> Sorry still waiting on members to submit times</p>
+                          <div id="authorize-div">
+                              <!--Button for the user to click to initiate auth sequence -->
+                              <button id="authorize-button" onclick="handleAuthClick(event)">
+                                Attend
+                              </button>
+                            </div>
+                            <br>
+                            <pre id="output" style="width:50%; margin-left: auto; margin-right: auto;"></pre>
+                            <br>
+                    <%}%>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    
 	<!-- Create Leave Meeting Btn & Modal -->
         <div id="leaveMeetingModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -80,26 +148,103 @@
             </div>
         </div>
         <!-- /#modal -->
-
-    <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
+    </div>
+    <!-- /#wrapper
 
     <!--
         Import Script Files:
         - Jquery js
         - Bootstrap js
-        - Date js
     -->
-
+    
+    <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-        
-    <script type="text/javascript">
 
-      // Your Client ID can be retrieved from your project in the Google
+    <script>
+        
+        $(document).ready(function () {
+            
+            var trigger = $('.hamburger'),
+                overlay = $('.overlay'),
+                isClosed = false;
+
+            trigger.click(function () {
+                hamburger_cross();
+            });
+
+            function hamburger_cross() {
+
+              if (isClosed == true) {
+                overlay.hide();
+                trigger.removeClass('is-open');
+                trigger.addClass('is-closed');
+                isClosed = false;
+              } else {
+                overlay.show();
+                trigger.removeClass('is-closed');
+                trigger.addClass('is-open');
+                isClosed = true;
+              }
+            }
+
+            $('[data-toggle="offcanvas"]').click(function () {
+                $('#wrapper').toggleClass('toggled');
+            });
+            
+            //Show Group Notification
+            $("#groupnotificationLink").click(function(){
+                $.growl({
+                    title: '<h2 id="group-header">Group Notification</h2>',
+                    message: 'You are currently included in ' + <%= user.google.notifications.groupNotif %> + ' group(s).'
+                },{
+                    type: 'group',
+                    position: {
+                    from: "bottom",
+                    align: "right"
+                },
+                    delay: 10000,
+                });
+                
+                $("#group_notif_count").fadeOut("slow");
+                $.get("/resetgroupNotifs");
+            });
+            
+            //Hide notification if their is nothing to notify.
+            if(<%= user.google.notifications.groupNotifCount %> == 0 ){
+                $("#group_notif_count").hide();
+            }
+            
+            //Show Meeting Notification
+            $("#meetnotificationLink").click(function(){
+                $.growl({
+                    title: '<h2 id="meeting-header">Meeting Notification</h2>',
+                    message: 'You currently have ' + <%= user.google.notifications.meetingNotif %> + ' meetings.'
+                }, {
+                    type: 'meeting',
+                    position: {
+                        from: "bottom",
+                        align: "right"
+                    },
+                    delay: 10000
+                });
+                
+                $("#meet_notif_count").fadeOut("slow");
+                $.get("/resetmeetingNotifs");
+                console.log(<%= user.google.notifications.groupNotifCount %>);
+                
+            });
+            
+            //Hide notification if their is nothing to notify.
+            if(<%= user.google.notifications.meetingNotifCount %> == 0){
+                $("#meet_notif_count").hide();
+            }
+        });
+        
+       // Your Client ID can be retrieved from your project in the Google
       // Developer Console, https://console.developers.google.com
-      var CLIENT_ID = '145217622872-45mhibnelavga610sog01k2lkc87f9ab.apps.googleusercontent.com';
+      var CLIENT_ID = '813433863993-dn497fmkof7a11h31rt6n7e1tubm2t68.apps.googleusercontent.com';
 
       var SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 
@@ -199,10 +344,7 @@
         var textContent = document.createTextNode(message + '\n');
         pre.appendChild(textContent);
       }
-        
     </script>
-
-
 
 </body>
 </html>
