@@ -58,7 +58,7 @@
             <li>
                 <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
             </li>
-            <li class="dropdown">
+            <li class="dropdown open">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-caret-down" aria-hidden="true"></i> Show Group Members</a>
               <ul class="dropdown-menu" role="menu">
                 <li class="dropdown-header">Members currently in this group: </li>
@@ -215,9 +215,19 @@
                 'startDate': "tomorrow"
             });
             
-            var trigger = $('.hamburger'),
-                overlay = $('.overlay'),
+            //Check if group is created,
+            //If group has been created pop open sidebar and show group members
+            var isGroupCreated = <%=group.created%>,
                 isClosed = false;
+
+            if( isGroupCreated == true){
+                $('#wrapper').toggleClass('toggled');
+                overlay.show();
+                isClosed = true;
+            }
+
+            var trigger = $('.hamburger'),
+                overlay = $('.overlay');
 
             trigger.click(function () {
                 hamburger_cross();
@@ -243,6 +253,10 @@
             $('[data-toggle="offcanvas"]').click(function () {
                 $('#wrapper').toggleClass('toggled');
             });
+
+            $('.dropdown-toggle').click(function (){
+                $('dropdown-menu').hide();
+            })
 			
 			// Meeting Name Validation
             $("#thisButton").click(function(e) {
@@ -307,14 +321,25 @@
                 $("#meet_notif_count").hide();
             }
             
-            $('#calendar').fullCalendar({
-                // put your options and callbacks here
-                events: [{
-                    title: 'event1',
-                    start: '2016-04-16',
-                    color: 'yellow'
-                }]
-            })
+//          Future Implementation when we get the final freetime available. Add Ejs stuff from group database afterwards.             
+//            var myCalendar = $('#calendar'); 
+//            myCalendar.fullCalendar();
+//            for(i=0; i < ; i++){
+//                var startDay = "".split("/");
+//                console.log(startDay);
+//                var endDay = "".split("/");
+//                var parseStartDay = parseInt(startDay[2]) + "-0" + parseInt(startDay[0]) + "-0" + parseInt(startDay[1]);
+//                var parseEndDay = parseInt(endDay[2]) + "-0" + parseInt(endDay[0]) + "-" + parseInt(endDay[1]);
+//                console.log(parseEndDay);
+//
+//                var myEvent = {
+//                  title: '',
+//                  allDay: true,
+//                  start: parseStartDay,
+//                  end: parseEndDay
+//                };
+//                myCalendar.fullCalendar( 'renderEvent', myEvent );
+//            }
             
         });
     </script>

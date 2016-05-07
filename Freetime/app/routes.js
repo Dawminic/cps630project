@@ -63,6 +63,7 @@ module.exports = function(app, passport){
 		var newGroup = new Group();
 		newGroup.name = groupName;
 		newGroup.members.push(userEmail);
+		newGroup.created = true;
 
         for(i=0; i<groupEmails.length; i++){
 			newGroup.members.push(groupEmails[i]);
@@ -93,7 +94,7 @@ module.exports = function(app, passport){
 							return done(err);
 						else
 						{
-							groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id});
+							groupMember.google.groups.push({groupname: groupName,groupID: newGroup.id, created: true});
 							groupMember.save();
 						}
 					});
@@ -218,6 +219,9 @@ module.exports = function(app, passport){
 		Group.findById(groupID, function(err,group){
 				// load our groupProfile template using the group found in query.
 				res.render('groupProfile.ejs',{group: group, user: user});
+				group.created = false;
+				group.save();
+
 			});
 		});
 
