@@ -1,34 +1,23 @@
-div h1{
-    margin-left: 1.5%;
-}
-
-#group-container {
-    margin-top: 10%;
-}
-
-td, th {
-    border: 1px solid #999;
-    padding: 0.5rem;
-}
-
-table{
+/* Centers the FreeTime on navigation*/
+.navbar-brand
+{
+    position: absolute;
     width: 100%;
+    left: 0;
+    text-align: center;
+    margin:0 auto;
+}
+.navbar-toggle {
+    z-index:3;
 }
 
-@media (max-width: 800px) {
-    
-    #group-container {
-        margin-top: 15%;
-    }
+/* GMAIL Calendar Fixed Position */
 
-    table {
-        width: 90%;
-        height: 100%;
-        margin-left: auto; 
-        margin-right: 7.5%;
-    }
-    
-    div h1{
-        margin-left: 5%;
-    }
+.meeting-container {
+	margin-top: 5%;
+}
+.element	{ position:fixed; top:15%; right:2%; }
+
+#calendar {
+    width: 50%;
 }

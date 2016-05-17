@@ -29,14 +29,6 @@
     <!-- Fonts -->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
 
-    <!-- DateTime Period Picker -->
-    <!-- Include Required Prerequisites -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/latest/css/bootstrap.css" />
-
-    <!-- Include Date Range Picker -->
-
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-
 </head>
 <body>
 <!-- Wrapper -->
@@ -44,29 +36,83 @@
         
     <div class="overlay" ></div>
     
-    <!-- Notifications(Group/Meetings) -->
-    <ul id="nav">
-        <li id="notification_li">
-            <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
-            <a href="#" id="groupnotificationLink"><i class="fa fa-group" aria-hidden="true" id="font-group"></i></a>
-        </li>
+    <nav class="navbar navbar-default" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>    
+                </div>
+                    <a class="navbar-brand" href="#">Brand</a>
+                <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= user.google.name %></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
+                            </li>
+                            
+                            <li>
+                                <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
+                            </li>
 
-        <li id="notification_li">
-            <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
-            <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" aria-hidden="true" id="font-calendar"></i></a>
-        </li>
-    </ul>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#leaveGroupModal"><i class="fa fa-remove" aria-hidden="true"></i> Leave Group</a>
+                            </li>
+                        </ul>
+                    </li>
 
-    <!-- Sidebar Navigation-->
-    <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-        <ul class="nav sidebar-nav">
-            <li class="sidebar-brand">
-                <h3><%= group.name %></h3>
-            </li>
-            <li>
-                <a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> Go To Profile</a>
-            </li>
-            <li class="dropdown open">
+                    <!-- The Users Groups -->
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Groups</a>
+                        <ul class="dropdown-menu">
+                            <% for(var i = 0; i < user.google.groups.length; i++) { %>
+                                <li>
+                                    <a href='/groupProfile/<%=user.google.groups[i].groupID%>'>
+                                    <%= user.google.groups[i].groupname%></a>
+                                </li>
+                            <%}%>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#addUserModal"><i class="fa fa-plus" aria-hidden="true"></i> Add User</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- The Groups Meetings -->
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Meetings</a>
+                        <ul class="dropdown-menu">
+                            <% for(var i = 0; i < group.meetings.length; i++) { %>
+                                <li>
+                                    <a href='/groupProfile/<%=user.google.groups[i].groupID%>'>
+                                    <%= group.meetings[i].meetingName %></a>
+                                </li>
+                            <%}%>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Find A Meeting</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="notification_li">
+                        <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
+                        <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group" aria-hidden="true"></i></a>
+                    </li>
+
+                    <li id="notification_li">
+                        <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
+                        <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+<!--      For Group Members List       <li class="dropdown open">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-caret-down" aria-hidden="true"></i> Show Group Members</a>
               <ul class="dropdown-menu" role="menu">
                 <li class="dropdown-header">Members currently in this group: </li>
@@ -74,31 +120,11 @@
                   <li><p><%= group.members[i] %></p></li>
                 <% } %>
               </ul>
-            </li>
-            <li>
-                <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Find A Meeting</a>
-            </li>
-            <li>
-                <a href="#" data-toggle="modal" data-target="#leaveGroupModal"><i class="fa fa-remove" aria-hidden="true"></i> Leave Group</a>
-            </li>
-            <li>
-                <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
-            </li>
-        </ul>
-    </nav>
-    <!-- /#sidebar-wrapper -->
+            </li> -->
 
     <!-- Page Content -->
-    <div id="page-content-wrapper">
-        <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
-            <span class="hamb-top"></span>
-            <span class="hamb-middle"></span>
-            <span class="hamb-bottom"></span>
-        </button>
+    <div id="page-container">
         <div class="container">
-            <div class="page-header text-center">
-                <h2><%= group.name %></h2>
-            </div>
             <% for(var i = 0; i < group.meetings.length; i++) { %>
                 <div class="border">
                     <h1><%= group.meetings[i].meetingName%></h1>
@@ -151,9 +177,6 @@
                 <form method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label>Period Picker</label>
-                            <input type="text" class="form-control" name="daterange"/>
-                            <br>
                             <label>Meeting Name</label>
                             <input type="text" class="form-control" name="meetingName" id="meetingName" required>
     						<label id="errorMessageMeetingName" style="color:red;"></label>
@@ -163,6 +186,16 @@
                             <br>
                             <label>Duration (in hours)</label>
                             <input type="number" class="form-control" min="1" name="meetingDuration" required>
+                            <br>
+                            <p id="basicExample">
+                                <label> Choose a Date </label><br>
+                                <input type="text" class="date start form-control" id="start" name="dateMin"  required/> to
+                                <input type="text" class="date end form-control" id="end" name="dateMax"  required/>
+                                <br><br>
+                                <label> Choose a Time </label><br>
+                                <input type="text" class="time start form-control" name="timeMin"  required/> to
+                                <input type="text" class="time end form-control" name="timeMax"  required/>
+                            </p>
                         </div>
                         <!-- /.form-group -->
                     </div>
@@ -193,20 +226,11 @@
 
     <!-- Other Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
-    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
 
     <script>
         
         $(document).ready(function () {
-
-                $('input[name="daterange"]').daterangepicker({
-                    timePicker: true,
-                    timePickerIncrement: 30,
-                    locale: {
-                        format: 'MM/DD/YYYY h:mm A'
-                    }
-                });
-
+            
             // initialize input widgets first
             $('#basicExample .time').timepicker({
                 'showDuration': true,
@@ -331,25 +355,28 @@
                 $("#meet_notif_count").hide();
             }
             
-//          Future Implementation when we get the final freetime available. Add Ejs stuff from group database afterwards.             
-//            var myCalendar = $('#calendar'); 
-//            myCalendar.fullCalendar();
-//            for(i=0; i < ; i++){
-//                var startDay = "".split("/");
-//                console.log(startDay);
-//                var endDay = "".split("/");
-//                var parseStartDay = parseInt(startDay[2]) + "-0" + parseInt(startDay[0]) + "-0" + parseInt(startDay[1]);
-//                var parseEndDay = parseInt(endDay[2]) + "-0" + parseInt(endDay[0]) + "-" + parseInt(endDay[1]);
-//                console.log(parseEndDay);
-//
-//                var myEvent = {
-//                  title: '',
-//                  allDay: true,
-//                  start: parseStartDay,
-//                  end: parseEndDay
-//                };
-//                myCalendar.fullCalendar( 'renderEvent', myEvent );
-//            }
+//          Future Implementation when we get the final freetime available. Add Ejs stuff from group database afterwards.  
+            var myCalendar = $('#calendar'); 
+            myCalendar.fullCalendar();       
+            <% for(var i = 0; i < group.meetings.length; i++) { %>
+                var startDay = '<%= group.meetings[i].startDay%>'.split("/");
+                console.log(startDay[0]);
+                var startTime = '<%= group.meetings[i].startTime%>';
+                var endDay = '<%= group.meetings[i].endDay%>'.split("/");
+                var endTime = '<%= group.meetings[i].endTime%>';
+                var startDayFormatted = moment(startDay[2] + "-" + startDay[0] + "-" + startDay[1] + "T" + startTime).toDate().toISOString();
+                var endedDayFormatted = moment(endDay[2] + "-" + endDay[0] + "-" + endDay[1] + "T" + endTime).toDate().toISOString();
+                console.log(startDay[0]);
+
+                var myEvent = {
+                    title: '<%= group.meetings[i].meetingName%>',
+                    allDay: true,
+                    start: startDayFormatted,
+                    end: endedDayFormatted
+                };
+                myCalendar.fullCalendar( 'renderEvent', myEvent, true);
+            <%}%>
+            
             
         });
     </script>
