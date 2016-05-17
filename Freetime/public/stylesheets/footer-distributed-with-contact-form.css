@@ -21,7 +21,8 @@
 
 .footer-distributed h3{
 	color:  #2B78C2;
-	font: normal 36px 'Cookie', cursive;
+	font-size: 36px;
+	font-family: 'Josefin Sans', sans-serif;
 	margin: 0 0 10px;
 }
 
