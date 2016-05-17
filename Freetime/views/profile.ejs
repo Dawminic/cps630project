@@ -17,7 +17,10 @@
     <!-- Bootstrap Core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css">
-
+    
+    <!-- FullCalendar Css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css">
+    
     <!-- Custom CSS -->
     <link href="/public/stylesheets/simple-sidebar.css" rel="stylesheet">
     <link href="/public/stylesheets/notifications.css" rel="stylesheet">
@@ -25,119 +28,133 @@
     
     <!-- Fonts -->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 
+    <!-- Custom Scripts -->
+    <script src="/public/js/profile_js.js"></script>
+    
 </head>
 
 <body>
 
 <div id="wrapper">
         
-        <!-- Blurs content when accessing sidebar. -->
-        <div class="overlay"></div>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>    
+                </div>
+                    <a class="navbar-brand" href="#">Brand</a>
+                <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= user.google.name %></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/help"><i class="fa fa-info-circle" aria-hidden="true"></i> Help</a>
+                            </li>
+                            <li>
+                                <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Groups</a>
+                        <ul class="dropdown-menu">
+                            <% for(var i = 0; i < user.google.groups.length; i++) { %>
+                                <li>
+                                    <a href='/groupProfile/<%=user.google.groups[i].groupID%>'>
+                                    <%= user.google.groups[i].groupname%></a>
+                                </li>
+                            <%}%>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Create New Group</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="notification_li">
+                        <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
+                        <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group" aria-hidden="true"></i></a>
+                    </li>
 
-        <!-- Notifications(Group/Meetings) -->
-        <ul id="nav">
-            <li id="notification_li">
-            <span id="group_notif_count"><%= user.google.notifications.groupNotifCount %></span>
-            <a href="#" id="groupnotificationLink"><i class="fa fa-group" id="font-group" aria-hidden="true"></i></a>
-            </li>
-
-            <li id="notification_li">
-                <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
-                <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar" aria-hidden="true"></i></a>
-            </li>
-        </ul>
-
-        <!-- Sidebar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-            <ul class="nav sidebar-nav">
-                <li class="sidebar-brand">
-                    <h3><%= user.google.name %></h3>
-                </li>
-                <li>
-                  <a href="#" id="group-show"><span class="caret"></span> Show Groups/Meetings</a>
-                </li>
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus" aria-hidden="true"></i> Create New Group</a>
-                </li>
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#delFreeTime"><i class="fa fa-remove" aria-hidden="true"></i> Delete Account</a>
-                </li>
-				<li>
-                    <a href="/help"><i class="fa fa-info-circle" aria-hidden="true"></i> Help</a>
-                </li>
-                <li>
-                    <a href="/logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
-                </li>
-            </ul>
+                    <li id="notification_li">
+                        <span id="meet_notif_count"><%= user.google.notifications.meetingNotifCount %></span>
+                        <a href="#" id="meetnotificationLink"><i class="fa fa-calendar" id="font-calendar" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+            </div>
         </nav>
-        <!-- /#sidebar-wrapper -->
 
         <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
-                <span class="hamb-top"></span>
-                <span class="hamb-middle"></span>
-                <span class="hamb-bottom"></span>
-            </button>
-            <div class="container">
-                <div class="page-header text-center">
-                    <h2>Hello, <%= user.google.name %>!</h2>
-				</div>
-                
-                <div id="group-container">
-                    <div id="user-group-information" style="display:none">
-                        <h1> Your groups </h1>
-                        <ul>
-                            
-                                <div class="row">
-                                    <table border="1">
-                                        <tr>
-                                            <th>Group #</th>
-                                            <th>Group Name</th>
-                                        </tr>
-                                        <% for(var i = 0; i < user.google.groups.length; i++) { %>
-                                        <tr>
-                                            <td><%= i + 1 %></td>
-                                            <td>
-                                                <a href='/groupProfile/<%=user.google.groups[i].groupID%>'>
-                                                <%= user.google.groups[i].groupname%><a>
-                                            </td>
-                                        </tr>
-                                        <%}%>
-                                    </table>
-                                </div>
+        <div class="page-container">
+            <div class="element" id="calendar"></div>
 
-                        </ul>
+            <div class="meeting-container">
+                <ul>
+                    <h1><a class="toggle-upcoming" href="#toggle-upcoming">Upcoming Meetings</a></h1>
+                    <div id="upcoming" style="display:none">
+                        <li></li>
+                        <li></li>
                     </div>
-                </div>
+                </ul>
+
+                <ul>
+                    <h1><a class="toggle-passed" href="#toggle-passed">Passed Meetings</a></h1>
+                    <div id="passed" style="display:none">
+                        <li></li>
+                        <li></li>
+                    </div>
+                </ul>
+
+                <ul>
+                    <h1><a class="toggle-pending" href="#toggle-pending">Pending Meetings</a></h1>
+                    <div id="pending" style="display:none">
+                        <li></li>
+                        <li></li>
+                    </div>
+                </ul>
+                
+                <ul>
+                    <h1><a class="toggle-add" href="#toggle-add">Add To Calendar</a></h1>
+                    <div id="add" style="display:none">
+                        <li></li>
+                        <li></li>
+                    </div>
+                </ul>
             </div>
         </div>
         <!-- /#page-content-wrapper -->
 
 		<!-- Create Delete FreeTime Account Btn & Modal -->
-			<div id="delFreeTime" class="modal fade" role="dialog">
-				<div class="modal-dialog">
-				<!-- Modal content-->
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal">&times;</button>
-						<h4 class="modal-title">Delete FreeTime Account</h4>
-					</div>
-						<form action="/deleteAccount" method="post" id="thisForm">
-							<div class="modal-body">
-							<div class="form-group">
-								<label>Are you sure you would like to delete your FreeTime Account?</label>
-							</div>
-							</div>
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-danger btn-lg" id="yesRemove">Yes</button>
-								<button type="button" data-dismiss="modal" class="btn btn-default btn-lg" id="noRemove">No</button>
-							</div>
-						</form>
-					</div>
+		<div id="delFreeTime" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Delete FreeTime Account</h4>
+				</div>
+					<form action="/deleteAccount" method="post" id="thisForm">
+						<div class="modal-body">
+						<div class="form-group">
+							<label>Are you sure you would like to delete your FreeTime Account?</label>
+						</div>
+						</div>
+						<div class="modal-footer">
+							<button type="submit" class="btn btn-danger btn-lg" id="yesRemove">Yes</button>
+							<button type="button" data-dismiss="modal" class="btn btn-default btn-lg" id="noRemove">No</button>
+						</div>
+					</form>
 				</div>
 			</div>
+		</div>
 		<!-- /#modal -->
 
         <!-- Create Group Btn & Modal -->
@@ -170,15 +187,19 @@
         <!-- /#modal -->
     </div>
     <!-- /#wrapper -->
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-
+    
+    <!-- Jquery Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
+    
     <!-- Bootstrap Core JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.6/bootstrap-growl.min.js"></script>
-
+    
+    <!-- Other Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.7.1/gcal.js"></script>
+    
     <!-- Menu Toggle Script -->
     <script>
         //REGEX Check
@@ -188,38 +209,11 @@
         };
 
         $(document).ready(function () {
-            // Start of SideBar navigation toggle
-            var trigger = $('.hamburger'),
-                overlay = $('.overlay'),
-                isClosed = false;
-
-            trigger.click(function () {
-                hamburger_cross();
-            });
-
-            function hamburger_cross() {
-
-              if (isClosed == true) {
-                overlay.hide();
-                trigger.removeClass('is-open');
-                trigger.addClass('is-closed');
-                isClosed = false;
-              } else {
-                overlay.show();
-                trigger.removeClass('is-closed');
-                trigger.addClass('is-open');
-                isClosed = true;
-              }
-            }
-
-            $('[data-toggle="offcanvas"]').click(function () {
-                $('#wrapper').toggleClass('toggled');
-            });
-            //End of SideBar toggle
-
-            // Toggle group information
-            $('#group-show').click(function(){
-                $('#user-group-information').toggle();
+            $('#calendar').fullCalendar({
+                googleCalendarApiKey: 'AIzaSyA0xEH84XqJ4KoXPTNe_DY_CdFapen92tU',
+                events: {
+                    googleCalendarId: '<%= user.google.email %>',
+                }
             });
 
             // Group Name/Email Validation
