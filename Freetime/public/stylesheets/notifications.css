@@ -26,25 +26,25 @@
 }
 
 #group_notif_count, #meet_notif_count {
-    padding: 1px 4px 1px 4px;
+    padding: 3px 7px 3px 7px;
     background: #cc0000;
     color: #ffffff;
     font-weight: bold;
-    margin-left: 65%;
-    margin-top: 2px;
+    margin-left: 125%;
     border-radius: 9px;
     -moz-border-radius: 9px; 
     -webkit-border-radius: 9px;
     position: absolute;
+    margin-top: -11px;
     font-size: 11px;
 }
 
 #font-group {
-    font-size: 22px;
+    font-size: 30px;
 }
 
 #font-calendar {
-    font-size: 22px;
+    font-size: 30px;
 }
 
 .alert-group {
