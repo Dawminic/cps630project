@@ -38,6 +38,7 @@ module.exports = function(app, passport){
 	});
 	
 	app.get('/resetgroupNotifs', function(req,res) {
+		//Reset current user's group notifications
 		var user = req.user;
 		user.google.notifications.groupNotifCount = 0;
 		user.save();
@@ -45,6 +46,7 @@ module.exports = function(app, passport){
 	});
     
     app.get('/resetmeetingNotifs', function(req,res) {
+		//Reset current user's meeting notifications
 		var user = req.user;
 		user.google.notifications.meetingNotifCount = 0;
 		user.save();
@@ -52,7 +54,7 @@ module.exports = function(app, passport){
 	});
 	
 
-	//When the user clicks button to create form
+	//When the user clicks button to create a group
 	app.post('/profile',function(req,res){
 		//Get form data
 		var user = req.user;
@@ -65,10 +67,11 @@ module.exports = function(app, passport){
 		newGroup.members.push(userEmail);
 		newGroup.created = true;
 
+		//For each user added to the new group
         for(i=0; i<groupEmails.length; i++){
 			newGroup.members.push(groupEmails[i]);
 
-			//Send group notification to users in group
+			//Send group notification to users added to group
 			User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 				if (err)
 					return done(err);
@@ -79,15 +82,15 @@ module.exports = function(app, passport){
 			});
         }
 
-		//save the Group
+		//Save the group
 		newGroup.save(function(err){
 			if(err){
 				console.log(err);
 			} else {
-				//once group is saved add the group to the users list of groups.
+				//Once group is saved, add the group to the each user's list of groups.
 				user.google.groups.push({groupname: groupName,groupID: newGroup.id});
 				user.save();
-
+				
 				for(i=0; i<groupEmails.length; i++) {
 					User.findOne({"google.email": groupEmails[i]}, function (err, groupMember){
 						if (err)
@@ -99,306 +102,30 @@ module.exports = function(app, passport){
 						}
 					});
 				}
-				//go to the groupProfile page. (use group's id in url)
+				
+				//Go to the groupProfile page. (use group's id in url)
 				res.redirect('/groupProfile/'+newGroup.id);
 			}
     	});
 	});
 	
 	//Remove the current user from the database
-		app.post('/deleteAccount', function(req, res){
-			var user = req.user;
-			var groups = user.google.groups;
-			var userToRemove = req.user.google.email;
-
-			//First, remove the user from all the groups they are apart of
-			
-			for (var i=0; i<groups.length; i++){
-				//Find group to remove user from, using groupID
-				Group.findById(groups[i].groupID, function(err, group) {
-					var members = group.members;
-					var index = members.indexOf(userToRemove);
-					var groupID = group.id;
-					
-					//If there are only 2 people inside the group that the
-					//current user wants to leave
-					if (members.length < 3){
-						//Remove all meetings relating to group, if any
-						if (group.meetings.length > 0) {
-							for (var i=0; i<group.meetings.length; i++) {
-								Meeting.find({"_id": group.meetings[i].meetingID}).remove().exec();
-							}
-						}
-						
-						//Remove the group to be removed from each user's
-						//list of groups
-						for (var i=1; i<members.length; i++) {
-							//Find the user, and loop through their groups
-							//till you find the group to be removed, and 
-							//remove it
-							User.findOne({"google.email": members[i]}, function (err, groupMember){	
-								var currMemberGroups = groupMember.google.groups;
-								for (var j=0; j<currMemberGroups.length; j++) {
-									if (groupMember.google.groups[j].groupID == groupID){
-										groupMember.google.groups.splice(j, 1);
-										groupMember.save();
-										break;
-									}
-								}
-								
-							});
-						}
-						//Delete the group from the database
-						Group.find({"_id": group.id}).remove().exec();
-					}
-				
-					else {
-						//First, remove the user from the meetings
-						//associated with the group
-						
-						//If there are meetings for this group
-						if (group.meetings.length > 0) {
-							//For each meeting, remove the user from all relevant
-							//parts of meeting
-							for (var i=0; i<group.meetings.length; i++) {
-								Meeting.findOne({"_id": group.meetings[i].meetingID}, function (err, meeting) {
-									var meetingMembers = meeting.meetingMembers;
-									var membersAccepted = meeting.membersAccepted;
-									var mIndex = meetingMembers.indexOf(userToRemove);
-									
-									//Remove the user from the meetingMembers array
-									meetingMembers.splice(mIndex, 1);
-									
-									//If user is moderator, remove user from meetingMembers, 
-									//set a new moderator
-									if (meeting.moderator == userToRemove) {
-										meeting.moderator = meetingMembers[0];
-									}				
-									
-									
-									//If the membersAccepted array is not empy
-									//check for the user and remove info
-									if (meeting.membersAccepted.length > 0) {
-										for (var j=0; j<meeting.membersAccepted.length; j++) {
-											if (membersAccepted[j].email == userToRemove) {
-												membersAccepted.splice(j, 1);
-												break;
-											}
-										}
-									}
-									meeting.meetingMembers = meetingMembers;
-									meeting.membersAccepted = membersAccepted;
-									meeting.save();
-									
-								});
-							}
-						}
-					
-						//Second, remove the user from relevant group info
-						members.splice(index, 1);
-						group.members = members;
-						group.save();
-						
-					}
-				});
-			}
-			
-			//Remove User from database, effectively deleting user's FreeTime account
-			User.find({"google.email": user.google.email}).remove().exec();
-			res.redirect('/');
-
-		});
-
-	// GROUP PROFILE PAGE
-		app.get('/groupProfile/:groupID',isLoggedIn,function(req,res){
-		// get the group ID from the url parameter
-		var groupID = req.params.groupID;
+	app.post('/deleteAccount', function(req, res){
 		var user = req.user;
-		// using the groupID find the corresponding group in our database
-			// so that we can use that information on the page ect.
-		Group.findById(groupID, function(err,group){
-				// load our groupProfile template using the group found in query.
-				res.render('groupProfile.ejs',{group: group, user: user});
-				group.created = false;
-				group.save();
+		var groups = user.google.groups;
+		var userToRemove = req.user.google.email;
 
-			});
-		});
-
-		// get and use information when user creates a new meeting request
-		app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
-			var groupID = req.params.groupID;
-			Group.findById(groupID, function(err,group){
-				var  newMeeting = new Meeting();
-
-				//Parse Date
-				var start = req.body.dateMin.split("/");
-				var end = req.body.dateMax.split("/");
-				//Start dates
-				var startmonth = parseInt(start[0]);
-				var startday = parseInt(start[1]);
-				var startyear = parseInt(start[2]);
-				//End dates
-				var endmonth = parseInt(end[0]);
-				var endday = parseInt(end[1]);
-				var endyear = parseInt(end[2]);
-
-				var beginTime = req.body.timeMin;
-				var endTime =  req.body.timeMax;
-				var beginSplit = beginTime.split(":");
-				var endSplit = endTime.split(":");
-				var beginHour = parseInt(beginSplit[0]);
-				var beginMinute;
-					//If minutes is '0', make it '00', else leave it as is
-					if(parseInt(beginSplit[1].substring(0,2)) == 0) {
-						beginMinute = "00";
-					}
-					else
-						beginMinute = parseInt(beginSplit[1].substring(0,2));
-				var zeroSeconds = "00";
-				var beginFinal;
-
-				var endHour = parseInt(endSplit[0]);
-				var endMinute;
-					//If minutes is '0', make it '00', else leave it as is
-					if(parseInt(endSplit[1].substring(0,2)) == 0) {
-						endMinute = "00";
-					}
-					else
-						endMinute = parseInt(endSplit[1].substring(0,2));
-				var endFinal;
-
-				var beginTimeOfDay = beginSplit[1].charAt(beginSplit[1].length - 2);
-				var endTimeOfDay = endSplit[1].charAt(endSplit[1].length - 2);
-
-				//Freebusy query should be in the form: '2016-02-29T10:30:00.0z
-
-				if (parseInt(startmonth) < 10){
-					startmonth = "0" + startmonth;
-				}
-
-				if (parseInt(startday) < 10){
-					startday = "0" + startday;
-				}
-
-				if (parseInt(endmonth) < 10){
-					endmonth = "0" + endmonth;
-				}
-
-				if (parseInt(endday) < 10){
-					endday = "0" + endday;
-				}
-				//Parse date so query can work
-				if (endTimeOfDay == 'a' && endHour == 12){
-					var finishTime = "00" + ":" + endMinute;
-					endFinal = finishTime + ":" + zeroSeconds;
-
-				}
-
-				else if(endTimeOfDay == 'a' && endHour > 9 && endHour < 12){
-					var finishTime = endHour + ":" + endMinute;
-					endFinal = finishTime + ":" + zeroSeconds;
-				}
-				else if(endTimeOfDay == 'p' && endHour == 12){
-					var finishTime = endHour + ":" + endMinute;
-					endFinal = finishTime + ":" + zeroSeconds;
-				}
-
-
-				else if(endTimeOfDay == 'p' && endHour < 12){
-					endHour = endHour + 12;
-					var finishTime = endHour + ":" + endMinute;
-					endFinal = finishTime + ":" + zeroSeconds;
-				}
-
-				else  {
-					var finishTime = "0" + endHour + ":" + endMinute;
-					endFinal = finishTime + ":" + zeroSeconds;
-				}
-
-				//Now do the startTime
-				if (beginTimeOfDay == 'a' && beginHour == 12){
-					var startTime = "00" + ":" + beginMinute;
-					beginFinal = startTime + ":" + zeroSeconds;
-				}
-
-				else if(beginTimeOfDay == 'a' && beginHour > 9 && beginHour < 12){
-					var startTime = beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + zeroSeconds;
-				}
-
-				else if(beginTimeOfDay == 'p' && beginHour == 12){
-					var startTime = beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + zeroSeconds;
-				}
-
-				else if(beginTimeOfDay == 'p' && beginHour < 12){
-					beginHour = beginHour + 12;
-					var startTime = beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + zeroSeconds;
-
-				}
-
-				else {
-					var startTime = "0" + beginHour + ":" + beginMinute;
-					beginFinal = startTime + ":" + zeroSeconds;
-				}
-
-
-				var fbTimeMin = startyear +"-"+startmonth+"-" +startday+"T"+beginFinal+".0z";
-				var fbTimeMax = endyear +"-"+endmonth+"-" +endday+"T"+endFinal+".0z";
-                newMeeting.timeMax = fbTimeMax;
-                newMeeting.timeMin = fbTimeMin;
-                newMeeting.name = req.body.meetingName;
-                newMeeting.startDay = req.body.dateMin;
-                newMeeting.endDay = req.body.dateMax;
-                newMeeting.startTime = startTime;
-                newMeeting.endTime = finishTime;
-                newMeeting.group = groupID;
-                newMeeting.meetingMembers = group.members;
-                newMeeting.duration = req.body.meetingDuration;
-                newMeeting.location = req.body.meetingLocation;
-                newMeeting.moderator = req.user.google.email;
-                newMeeting.final = false;
-				newMeeting.save(function(err){
-					if(err){
-						console.log(err);
-					} else {
-						group.meetings.push({meetingName: newMeeting.name, startDay: newMeeting.startDay, endDay: newMeeting.endDay, startTime: newMeeting.startTime, endTime: newMeeting.endTime, meetingID:newMeeting.id});
-						group.save();
-                        //Members Emails that are in the meeting
-                        var meetingEmails = newMeeting.meetingMembers;
-                        for(i=0; i<meetingEmails.length; i++){
-                            //Send group notification to users in meeting
-                            User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
-                                if (err)
-                                    return done(err);
-                                else
-                                    meetingMember.google.notifications.meetingNotif += 1;
-                                    meetingMember.google.notifications.meetingNotifCount += 1;
-                                    meetingMember.save();
-                            });
-                        }
-						res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
-					}
-				});
-			});
-		});
-
-		//Remove user from group 
-		app.post('/leaveGroup/:groupID', function (req, res) {
-			var groupID = req.params.groupID;
-			var userToRemove = req.user.google.email;
-			var user = req.user;
-			var userGroups = user.google.groups;
+		//First, remove the user from all the groups they are apart of
+		//For each group the user is apart of
+		for (var i=0; i<groups.length; i++){
 			
 			//Find group to remove user from, using groupID
-			Group.findById(groupID, function(err, group) {
+			Group.findById(groups[i].groupID, function(err, group) {
 				var members = group.members;
 				var index = members.indexOf(userToRemove);
+				var groupID = group.id;
 				
-				//If there are only 2 people inside the group that the
-				//current user wants to leave
+				//If there are only 2 people inside the group that the current user wants to leave
 				if (members.length < 3){
 					//Remove all meetings relating to group, if any
 					if (group.meetings.length > 0) {
@@ -407,9 +134,8 @@ module.exports = function(app, passport){
 						}
 					}
 					
-					//Remove the group to be removed from each user's
-					//list of groups
-					for (var i=0; i<members.length; i++) {
+					//Remove the group to be removed from each user's list of groups
+					for (var i=1; i<members.length; i++) {
 						//Find the user, and loop through their groups
 						//till you find the group to be removed, and 
 						//remove it
@@ -424,9 +150,9 @@ module.exports = function(app, passport){
 							}
 							
 						});
-						//Delete the group from the database
-						Group.find({"_id": group.id}).remove().exec();
 					}
+					//Delete the group from the database
+					Group.find({"_id": group.id}).remove().exec();
 				}
 			
 				else {
@@ -476,35 +202,199 @@ module.exports = function(app, passport){
 					group.members = members;
 					group.save();
 					
-					//Last, remove the group from the user's
-					//list of groups
-					for (var x=0; x<user.google.groups.length;x++) {
-						if (userGroups[x].groupID == groupID){
-							userGroups.splice(x, 1);
-							user.google.groups = userGroups;
-							user.save();
-							break;
-						}
-					}
 				}
 			});
-			
-			res.redirect('/profile');
+		}
+		
+		//Remove User from database, effectively deleting user's FreeTime account
+		User.find({"google.email": user.google.email}).remove().exec();
+		res.redirect('/');
+
+	});
+
+// GROUP PROFILE PAGE
+	app.get('/groupProfile/:groupID',isLoggedIn,function(req,res){
+	// get the group ID from the url parameter
+	var groupID = req.params.groupID;
+	var user = req.user;
+	// using the groupID find the corresponding group in our database
+		// so that we can use that information on the page ect.
+	Group.findById(groupID, function(err,group){
+			// load our groupProfile template using the group found in query.
+			res.render('groupProfile.ejs',{group: group, user: user});
+			group.created = false;
+			group.save();
 		});
+	});
 
-		// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
-		app.post('/getauth/:meetingID', function (req, res) {
-			var meetingID = req.params.meetingID;
-			var userBusy = req.body.busy;
-			var userEmail = req.user.google.email;
-
-			Meeting.findById(meetingID, function(err,meeting){
-				meeting.membersAccepted.push({email:userEmail, busy: userBusy});
-				meeting.save();
+	// get and use information when user creates a new meeting request
+	app.post('/groupProfile/:groupID',isLoggedIn,function(req,res){
+		var groupID = req.params.groupID;
+		Group.findById(groupID, function(err,group){
+			var  newMeeting = new Meeting();
+            var datetimes = req.body.daterange.split(" - ");
+			var fbTimeMin = dateFormat(datetimes[0], "isoDateTime");
+			var fbTimeMax = dateFormat(datetimes[1], "isoDateTime");
+			newMeeting.timeMax = fbTimeMax;
+			newMeeting.timeMin = fbTimeMin;
+            var start = datetimes[0].split(" ");
+            var end = datetimes[1].split(" ");
+			newMeeting.name = req.body.meetingName;
+			newMeeting.startDay = start[0];
+			newMeeting.endDay = end[0];
+			newMeeting.startTime = start[1]+start[2];
+			newMeeting.endTime = end[1] + end[2];
+			newMeeting.group = groupID;
+			newMeeting.meetingMembers = group.members;
+			newMeeting.duration = req.body.meetingDuration;
+			newMeeting.location = req.body.meetingLocation;
+			newMeeting.moderator = req.user.google.email;
+			newMeeting.final = false;
+			newMeeting.save(function(err){
+				if(err){
+					console.log(err);
+				} else {
+					group.meetings.push({meetingName: newMeeting.name, startDay: newMeeting.startDay, endDay: newMeeting.endDay, startTime: newMeeting.startTime, endTime: newMeeting.endTime, meetingID:newMeeting.id});
+					group.save();
+					//Members Emails that are in the meeting
+					var meetingEmails = newMeeting.meetingMembers;
+					for(i=0; i<meetingEmails.length; i++){
+						//Send group notification to users in meeting
+						User.findOne({"google.email": meetingEmails[i]}, function (err, meetingMember){
+							if (err)
+								return done(err);
+							else
+								meetingMember.google.notifications.meetingNotif += 1;
+								meetingMember.google.notifications.meetingNotifCount += 1;
+								meetingMember.save();
+						});
+					}
+					res.redirect('/meetingPage/' + groupID +"/" + newMeeting.id);
+				}
 			});
 		});
+	});
 
-	//MEETING PAGE
+	//Remove user from group 
+	app.post('/leaveGroup/:groupID', function (req, res) {
+		var groupID = req.params.groupID;
+		var userToRemove = req.user.google.email;
+		var user = req.user;
+		var userGroups = user.google.groups;
+		
+		//Find group to remove user from, using groupID
+		Group.findById(groupID, function(err, group) {
+			var members = group.members;
+			var index = members.indexOf(userToRemove);
+			
+			//If there are only 2 people inside the group that the
+			//current user wants to leave
+			if (members.length < 3){
+				//Remove all meetings relating to group, if any
+				if (group.meetings.length > 0) {
+					for (var i=0; i<group.meetings.length; i++) {
+						Meeting.find({"_id": group.meetings[i].meetingID}).remove().exec();
+					}
+				}
+				
+				//Remove the group to be removed from each user's
+				//list of groups
+				for (var i=0; i<members.length; i++) {
+					//Find the user, and loop through their groups
+					//till you find the group to be removed, and 
+					//remove it
+					User.findOne({"google.email": members[i]}, function (err, groupMember){	
+						var currMemberGroups = groupMember.google.groups;
+						for (var j=0; j<currMemberGroups.length; j++) {
+							if (groupMember.google.groups[j].groupID == groupID){
+								groupMember.google.groups.splice(j, 1);
+								groupMember.save();
+								break;
+							}
+						}
+						
+					});
+					//Delete the group from the database
+					Group.find({"_id": group.id}).remove().exec();
+				}
+			}
+		
+			else {
+				//First, remove the user from the meetings
+				//associated with the group
+				
+				//If there are meetings for this group
+				if (group.meetings.length > 0) {
+					//For each meeting, remove the user from all relevant
+					//parts of meeting
+					for (var i=0; i<group.meetings.length; i++) {
+						Meeting.findOne({"_id": group.meetings[i].meetingID}, function (err, meeting) {
+							var meetingMembers = meeting.meetingMembers;
+							var membersAccepted = meeting.membersAccepted;
+							var mIndex = meetingMembers.indexOf(userToRemove);
+							
+							//Remove the user from the meetingMembers array
+							meetingMembers.splice(mIndex, 1);
+							
+							//If user is moderator, remove user from meetingMembers, 
+							//set a new moderator
+							if (meeting.moderator == userToRemove) {
+								meeting.moderator = meetingMembers[0];
+							}				
+							
+							
+							//If the membersAccepted array is not empy
+							//check for the user and remove info
+							if (meeting.membersAccepted.length > 0) {
+								for (var j=0; j<meeting.membersAccepted.length; j++) {
+									if (membersAccepted[j].email == userToRemove) {
+										membersAccepted.splice(j, 1);
+										break;
+									}
+								}
+							}
+							meeting.meetingMembers = meetingMembers;
+							meeting.membersAccepted = membersAccepted;
+							meeting.save();
+							
+						});
+					}
+				}
+			
+				//Second, remove the user from relevant group info
+				members.splice(index, 1);
+				group.members = members;
+				group.save();
+				
+				//Last, remove the group from the user's
+				//list of groups
+				for (var x=0; x<user.google.groups.length;x++) {
+					if (userGroups[x].groupID == groupID){
+						userGroups.splice(x, 1);
+						user.google.groups = userGroups;
+						user.save();
+						break;
+					}
+				}
+			}
+		});
+		
+		res.redirect('/profile');
+	});
+
+	// WHEN USER GENERATES THIER FREEBUSY QUERY ADD IT TO THE DATABASE
+	app.post('/getauth/:meetingID', function (req, res) {
+		var meetingID = req.params.meetingID;
+		var userBusy = req.body.busy;
+		var userEmail = req.user.google.email;
+
+		Meeting.findById(meetingID, function(err,meeting){
+			meeting.membersAccepted.push({email:userEmail, busy: userBusy});
+			meeting.save();
+		});
+	});
+
+//MEETING PAGE
 	app.get('/meetingPage/:groupID/:meetingID',isLoggedIn,function(req,res){
 		var groupID = req.params.groupID;
 		var meetingID = req.params.meetingID;
