@@ -15,7 +15,8 @@
     <title>Group Profile</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2.1.19/daterangepicker.css">
+    
 
     <!-- JQuery CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.11/jquery.timepicker.css">
@@ -177,6 +178,8 @@
                 <form method="post">
                     <div class="modal-body">
                         <div class="form-group">
+                            <label>Period Picker</label>
+                            <input type="text" class="form-control" name="daterange"/><br>
                             <label>Meeting Name</label>
                             <input type="text" class="form-control" name="meetingName" id="meetingName" required>
     						<label id="errorMessageMeetingName" style="color:red;"></label>
@@ -187,15 +190,6 @@
                             <label>Duration (in hours)</label>
                             <input type="number" class="form-control" min="1" name="meetingDuration" required>
                             <br>
-                            <p id="basicExample">
-                                <label> Choose a Date </label><br>
-                                <input type="text" class="date start form-control" id="start" name="dateMin"  required/> to
-                                <input type="text" class="date end form-control" id="end" name="dateMax"  required/>
-                                <br><br>
-                                <label> Choose a Time </label><br>
-                                <input type="text" class="time start form-control" name="timeMin"  required/> to
-                                <input type="text" class="time end form-control" name="timeMax"  required/>
-                            </p>
                         </div>
                         <!-- /.form-group -->
                     </div>
@@ -226,72 +220,20 @@
 
     <!-- Other Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2.1.19/daterangepicker.js"></script>
 
     <script>
         
         $(document).ready(function () {
             
-            // initialize input widgets first
-            $('#basicExample .time').timepicker({
-                'showDuration': true,
-                'timeFormat': 'g:ia'
+            $('input[name="daterange"]').daterangepicker({
+                timePicker: true,
+                timePickerIncrement: 30,
+                locale: {
+                    format: 'MM/DD/YYYY h:mm A'
+                }
             });
 
-            $('#basicExample .date.start').datepicker({
-                'format': 'm/d/yyyy',
-                'autoclose': true,
-                'startDate': "today"
-            });
-            
-            $('#basicExample .date.end').datepicker({
-                'format': 'm/d/yyyy',
-                'autoclose': true,
-                'startDate': "tomorrow"
-            });
-            
-            //Check if group is created,
-            //If group has been created pop open sidebar and show group members
-            var isGroupCreated = <%=group.created%>,
-                isClosed = false;
-
-            if( isGroupCreated == true){
-                $('#wrapper').toggleClass('toggled');
-                overlay.show();
-                isClosed = true;
-            }
-
-            var trigger = $('.hamburger'),
-                overlay = $('.overlay');
-
-            trigger.click(function () {
-                hamburger_cross();
-            });
-
-            // menu button for the sidebar
-            // toggles the sidebar to show and than dissapear
-            function hamburger_cross() {
-
-              if (isClosed == true) {
-                overlay.hide();
-                trigger.removeClass('is-open');
-                trigger.addClass('is-closed');
-                isClosed = false;
-              } else {
-                overlay.show();
-                trigger.removeClass('is-closed');
-                trigger.addClass('is-open');
-                isClosed = true;
-              }
-            }
-
-            $('[data-toggle="offcanvas"]').click(function () {
-                $('#wrapper').toggleClass('toggled');
-            });
-
-            $('.dropdown-toggle').click(function (){
-                $('dropdown-menu').hide();
-            })
-			
 			// Meeting Name Validation
             $("#thisButton").click(function(e) {
 				var meetingName = $("#meetingName").val();
