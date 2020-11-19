@@ -8,7 +8,7 @@
     "cookie-parser": "~1.0.0",
     "datejs": "0.0.2",
     "ejs": "~0.8.5",
-    "express": "~4.0.0",
+    "express": "~4.17.1",
     "express-session": "~1.0.0",
     "google-auth-library": "^0.9.7",
     "google-calendar": "latest",
