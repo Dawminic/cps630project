@@ -7,7 +7,7 @@
     "connect-flash": "~0.1.1",
     "cookie-parser": "~1.0.0",
     "datejs": "0.0.2",
-    "ejs": "~0.8.5",
+    "ejs": "~3.0.1",
     "express": "~4.0.0",
     "express-session": "~1.0.0",
     "google-auth-library": "^0.9.7",
